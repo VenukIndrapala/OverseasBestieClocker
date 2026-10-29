@@ -15,7 +15,7 @@
 
 <main class="stage">
 
-  <!-- left: the three question cards (same look as the cards in the dashboard's Today's Log) -->
+  <!-- left: the three question cards -->
   <section class="qpanel reveal" style="--dx:-110px;--i:0" aria-label="Three questions">
     <ul id="qlist">
 
@@ -60,7 +60,6 @@
     <div class="envelope" id="envelope">
       <div class="env-back"></div>
 
-      <!-- the letter sheet resting inside the envelope (only its top shows once the flap is up) -->
       <div class="paper" aria-hidden="true">
         <svg class="orn" viewBox="0 0 64 14">
           <circle cx="9" cy="7" r="3.1" fill="none" stroke="#b3382a" stroke-width="1.3"/>
@@ -76,7 +75,6 @@
         <i class="spark s1"></i><i class="spark s2"></i><i class="spark s3"></i>
       </div>
 
-      <!-- the front of the envelope: left + right folds and the bottom fold with its rounded top edge -->
       <div class="env-front" aria-hidden="true">
         <svg viewBox="0 0 300 200" preserveAspectRatio="none">
           <defs>
@@ -93,7 +91,6 @@
         </svg>
       </div>
 
-      <!-- the flap: outer face (with the heart seal) while closed, inner face once it has swung up -->
       <div class="env-flap">
         <div class="face out">
           <svg viewBox="0 0 300 112">
@@ -123,7 +120,7 @@
 
 </main>
 
-<!-- the scratch card: slides in from the bottom once the coin is out of the envelope; the coin is the scratching tool -->
+<!-- the scratch card: slides in once the coin is out of the envelope; the coin is the scratching tool -->
 <div class="scratch" id="scratch" aria-label="Scratch card">
   <div class="swrap">
     <div class="scard" id="scard">
@@ -146,6 +143,9 @@
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
+
 <script src="letter.js"></script>
+<!-- NEW: the pumpkin step (must come AFTER letter.js). The pumpkin picture is built into this file. -->
+<script src="pumpkin.js"></script>
 </body>
 </html>

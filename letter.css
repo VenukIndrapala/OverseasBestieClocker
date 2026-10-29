@@ -162,11 +162,10 @@ html:has(body.scratch-mode),body.scratch-mode{overflow:hidden}
 .st1{font:400 19px 'Lobster','Lobster Two',cursive;fill:#fff;stroke:#fff;stroke-width:.7;stroke-linejoin:round;paint-order:stroke}
 .st2{font:italic 700 6.3px 'Lobster Two','Lobster',cursive;fill:#fff}
 
-/* the silver panel; "haha" waits underneath it */
+/* the silver panel; the hidden text waits underneath it */
 .szone{position:absolute;left:12.2%;top:51%;width:74.8%;height:35.3%;border-radius:6.4cqw;overflow:hidden;background:linear-gradient(#fff7f3,#ffe8df);box-shadow:inset 0 0 0 1px rgba(254,98,98,.18)}
 .prize{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2cqw;padding:0 3cqw;text-align:center;color:#fe6262}
-.p1{font:400 17cqw/1 'Lobster','Lobster Two',cursive;letter-spacing:.01em;text-shadow:0 .6cqw 0 rgba(184,53,59,.25)}
-.p2{font:italic 700 5cqw/1.15 'Lobster Two','Lobster',cursive;color:#b8353b}
+.p2{font:italic 700 8.6cqw/1.2 'Lobster Two','Lobster',cursive;color:#fe6262;text-shadow:0 .5cqw 0 rgba(184,53,59,.22)}
 #scv{position:absolute;inset:0;width:100%;height:100%;display:block;transition:opacity .7s ease}
 #scv.gone{opacity:0}
 

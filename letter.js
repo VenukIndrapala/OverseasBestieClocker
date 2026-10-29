@@ -22,6 +22,12 @@ const env = $('#envelope'), coin = $('#coin'), hint = $('#hint'), dots = $$('#pr
 const solved = new Set();
 let opened = false, ready = false;
 
+/* decode the coin and the cow ahead of time, so nothing has to be decoded in the middle of the opening animation */
+$$('#coin img, .env-flap image').forEach(el => {
+  if (el.decode) el.decode().catch(() => {});
+  else if (el.tagName === 'image') { const i = new Image(); i.src = el.getAttribute('href'); }
+});
+
 /* ---------------- the three cards ---------------- */
 function check(card) {
   const q = card.dataset.q, input = card.querySelector('.ans');

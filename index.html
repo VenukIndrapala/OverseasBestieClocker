@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Three Questions</title>
+<link rel="preload" as="image" href="coin.png">
+<link rel="stylesheet" href="letter.css">
+</head>
+<body>
+
+<main class="stage">
+
+  <!-- left: the three question cards (same look as the cards in the dashboard's Today's Log) -->
+  <section class="qpanel reveal" style="--dx:-110px;--i:0" aria-label="Three questions">
+    <ul id="qlist">
+
+      <li class="qc reveal lift" data-q="1" style="--dy:-60px;--i:1">
+        <div class="qtop">
+          <label class="qh" for="a1"><span class="qn">01.</span><b>Name of the person who&#8217;s beating bestie?</b></label>
+          <span class="ok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        </div>
+        <div class="qrow">
+          <span class="fx"><input type="text" id="a1" class="ans" maxlength="40" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done" placeholder="Type a name, press Enter" aria-label="Question 1 answer"></span>
+          <button type="button" class="qbtn" data-pop>Check</button>
+        </div>
+      </li>
+
+      <li class="qc reveal lift" data-q="2" style="--dy:-60px;--i:2">
+        <div class="qtop">
+          <label class="qh" for="a2"><span class="qn">02.</span><b>Name of the person Venuk is going to miss for a week?</b></label>
+          <span class="ok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        </div>
+        <div class="qrow">
+          <span class="fx"><input type="text" id="a2" class="ans" maxlength="40" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done" placeholder="Type a name, press Enter" aria-label="Question 2 answer"></span>
+          <button type="button" class="qbtn" data-pop>Check</button>
+        </div>
+      </li>
+
+      <li class="qc reveal lift" data-q="3" style="--dy:-60px;--i:3">
+        <div class="qtop">
+          <label class="qh" for="a3"><span class="qn">03.</span><b>Name of the person who never backs down and never gives up?</b></label>
+          <span class="ok" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        </div>
+        <div class="qrow">
+          <span class="fx"><input type="text" id="a3" class="ans" maxlength="40" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done" placeholder="Type a name, press Enter" aria-label="Question 3 answer"></span>
+          <button type="button" class="qbtn" data-pop>Check</button>
+        </div>
+      </li>
+
+    </ul>
+  </section>
+
+  <!-- right: the closed envelope. It opens by itself once all three answers are right; the coin inside can be dragged out -->
+  <section class="envwrap reveal" style="--dx:110px;--i:2" aria-label="Sealed envelope">
+    <div class="envelope" id="envelope">
+      <div class="env-back"></div>
+
+      <div class="coin in-env" id="coin" role="img" aria-label="Gold coin. Once it is out of the envelope you can drag it anywhere." tabindex="-1">
+        <div class="coin-bob"><img src="coin.png" alt="" width="320" height="320" draggable="false" decoding="async"></div>
+        <i class="spark s1"></i><i class="spark s2"></i><i class="spark s3"></i>
+      </div>
+
+      <div class="env-front"><i class="f-left"></i><i class="f-right"></i><i class="f-bottom"></i></div>
+
+      <div class="env-flap">
+        <div class="face out">
+          <svg class="seal" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
+        <div class="face in"></div>
+      </div>
+    </div>
+
+    <div class="progress" id="progress" role="status" aria-label="0 of 3 answers correct"><i></i><i></i><i></i></div>
+    <p class="hint" id="hint" aria-live="polite"></p>
+  </section>
+
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="letter.js"></script>
+</body>
+</html>

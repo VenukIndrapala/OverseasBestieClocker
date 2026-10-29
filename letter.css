@@ -1,0 +1,144 @@
+/* Drop Line - the same font file the dashboard uses.
+   Put DropLine.otf in a "fonts" folder next to this file (or in ../fonts if this page lives in a sub-folder of the dashboard repo). */
+@font-face{
+  font-family:'Drop Line';
+  src:local('Drop Line'),local('DropLine'),
+      url('fonts/DropLine.otf') format('opentype'),
+      url('../fonts/DropLine.otf') format('opentype');
+  font-weight:100 900;font-style:normal;font-display:swap;
+}
+:root{
+  --ink:#5B2A26;            /* text colour: deep rose-brown that sits well on Soft Pink */
+  --ink2:#7A4A42;           /* softer text for small labels */
+  --accent:#C9563F;         /* seal / focus colour */
+  --softpink:#FAB6A2;       /* Clairtone 8083-8 Soft Pink */
+  --softpink2:#FCCDBF;      /* lighter tint of it */
+  --softpink3:#FEE6DE;      /* light tint for small cards inside the pink panels */
+  --pinkgrad:linear-gradient(135deg,var(--softpink),var(--softpink2));
+  --font:'Drop Line','Trebuchet MS','Segoe UI',system-ui,-apple-system,sans-serif;
+  --r:22px;                 /* one corner radius for every card */
+  --ex:min(400px,84vw);     /* envelope width (height is 2/3 of it) */
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:#fff;color:var(--ink);font:15px/1.4 var(--font);overflow-x:hidden;min-height:100vh;min-height:100dvh}
+button,input{font-family:var(--font)}
+button{font:inherit;color:inherit;cursor:pointer}
+[hidden]{display:none!important}
+ul{list-style:none;margin:0;padding:0}
+
+/* ---------- layout ---------- */
+.stage{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(300px,450px) minmax(0,1fr);gap:56px;align-items:center;justify-content:center;max-width:1120px;margin:0 auto;padding:48px 36px 60px}
+
+/* ---------- entrance + feedback animations (same as the dashboard) ---------- */
+@keyframes cardIn{from{opacity:0;translate:var(--dx,0) var(--dy,0)}}
+.reveal{animation:cardIn .75s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i,0)*90ms)}
+@keyframes pop{0%{scale:1}45%{scale:1.14}100%{scale:1}}
+.pop{animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+.lift,.qc,.fx{transition:transform .25s,box-shadow .25s}
+.qc:hover:not(:has(.fx:hover)){transform:translateY(-5px)}
+.fx:hover{transform:translateY(-5px)}
+/* a thin invisible strip under each lifting card keeps it hovered when the pointer is at its bottom edge (no flicker) */
+.qc::before,.fx::before{content:"";position:absolute;left:0;right:0;top:100%;height:8px}
+.qc{position:relative}
+
+/* ---------- question cards (the Today's Log look) ---------- */
+.qpanel{padding:22px 18px 18px;border-radius:var(--r);background:var(--pinkgrad);box-shadow:0 22px 50px rgba(91,42,38,.1)}
+#qlist{display:flex;flex-direction:column;gap:14px}
+.qc{padding:16px 16px 16px;border-radius:14px;background:var(--softpink3);box-shadow:0 6px 16px rgba(91,42,38,.1)}
+.qtop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.qh{display:flex;align-items:baseline;gap:10px;font:700 17px/1.25 var(--font);color:var(--ink);margin:0;cursor:pointer}
+.qh b{font:inherit}
+.qn{flex:none;font:700 17px/1.25 var(--font);color:var(--accent)}
+.fx{display:block;position:relative;margin-top:0}
+.qrow{display:flex;gap:8px;margin-top:12px}
+.qrow .fx{flex:1;min-width:0}
+.ans{display:block;width:100%;min-width:0;margin:0;padding:10px 12px;border:1px solid rgba(91,42,38,.22);border-radius:10px;background:#fffaf8;color:var(--ink);font:400 15px var(--font)}
+.ans::placeholder{color:#94675d}
+.ans:focus-visible,.qbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.qbtn{flex:none;border:0;border-radius:10px;padding:0 18px;background:var(--ink);color:#fff;font:700 15px var(--font);transition:background .2s,transform .2s}
+.qbtn:hover{background:#3d1a17;transform:translateY(-2px)}
+
+/* correct: the card locks and a tick pops in */
+.ok{flex:none;width:28px;height:28px;border-radius:9px;background:var(--ink);display:grid;place-items:center;scale:0;opacity:0;transition:scale .35s cubic-bezier(.34,1.56,.64,1),opacity .2s}
+.ok svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.qc.done .ok{scale:1;opacity:1}
+.qc.done .qbtn{display:none}
+.qc.done .ans{background:rgba(255,255,255,.55);border-color:rgba(91,42,38,.12);font-weight:700;cursor:default}
+
+/* wrong: the card shakes */
+@keyframes shake{0%,100%{translate:0}20%{translate:-8px}40%{translate:7px}60%{translate:-5px}80%{translate:3px}}
+.qc.bad{animation:shake .42s ease}
+
+/* ---------- envelope ---------- */
+.envwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding-top:calc(var(--ex)*.4)}
+.envelope{position:relative;width:var(--ex);aspect-ratio:3/2;perspective:1100px;margin:0 auto}
+.envelope.nudge{animation:nudge .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes nudge{0%{translate:0 0;rotate:0deg}30%{translate:0 -9px;rotate:-1.2deg}65%{translate:0 0;rotate:.8deg}100%{translate:0 0;rotate:0deg}}
+.env-back{position:absolute;inset:0;border-radius:4px;background:linear-gradient(135deg,#fcd0c3,#f8b9a5);box-shadow:0 18px 34px rgba(91,42,38,.2),inset 0 0 30px -6px rgba(201,86,63,.38)}
+.envwrap::after{content:"";width:calc(var(--ex)*.8);height:16px;margin-top:22px;border-radius:50%;background:rgba(91,42,38,.14);filter:blur(10px);order:5}
+
+/* the inside of the envelope (darker lining), only visible once the flap is up */
+.env-back::after{content:"";position:absolute;inset:0;clip-path:polygon(0 0,100% 0,50% 56%);background:linear-gradient(180deg,#eea08b,#f6b3a0)}
+
+/* the three front folds (the closed flap fills the top triangle) */
+.env-front{position:absolute;inset:0;z-index:2;border-radius:4px;overflow:hidden;pointer-events:none}
+.env-front i{position:absolute;inset:0;display:block}
+.f-left{clip-path:polygon(0 0,51% 56%,0 100%);background:linear-gradient(100deg,#fcc7b6,#f8b19c)}
+.f-right{clip-path:polygon(100% 0,49% 56%,100% 100%);background:linear-gradient(260deg,#fcc7b6,#f6ad98)}
+.f-bottom{clip-path:polygon(0 100%,50% 54%,100% 100%);background:linear-gradient(0deg,#f7ab96,#fcc4b2)}
+
+/* the flap: outer face (with the heart seal) while closed, inner face once flipped open */
+.env-flap{position:absolute;left:0;top:0;width:100%;height:56%;z-index:3;transform-origin:50% 0;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.5,0,.25,1);pointer-events:none}
+.env-flap .face{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,50% 100%);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.env-flap .out{background:linear-gradient(180deg,#fcc6b4 0%,#f6a893 100%)}
+.env-flap .in{background:linear-gradient(180deg,#eb9078,#f4a691);transform:rotateX(180deg)}
+.seal{position:absolute;left:50%;top:52%;width:15%;aspect-ratio:1;translate:-50% -50%;fill:var(--accent);filter:drop-shadow(0 3px 3px rgba(91,42,38,.35))}
+.envelope.open .env-flap{transform:rotateX(-180deg)}
+.envelope.flap-back .env-flap{z-index:0}            /* once it has swung over, it sits behind the coin */
+
+/* ---------- the coin ---------- */
+.coin{position:absolute;left:32%;top:30%;width:36%;aspect-ratio:1;z-index:1;touch-action:none;-webkit-user-select:none;user-select:none;outline:none}
+.coin-bob{width:100%;height:100%;transform-origin:50% 60%;transition:rotate .12s linear}
+.coin img{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 6px 7px rgba(91,42,38,.38))}
+.coin.in-env{transition:transform 1s cubic-bezier(.2,.9,.25,1.12)}
+.coin.risen{transform:translateY(-58%);cursor:grab}
+.coin.risen .coin-bob{animation:bob 2.8s ease-in-out infinite}
+@keyframes bob{0%,100%{translate:0 0;rotate:-1.5deg}50%{translate:0 -4px;rotate:1.5deg}}
+.coin:focus-visible{outline:2px solid var(--accent);outline-offset:6px;border-radius:50%}
+
+/* picked up / dropped anywhere on the page */
+.coin.free{position:absolute;z-index:1000;margin:0;cursor:grab;transition:scale .2s cubic-bezier(.34,1.56,.64,1)}
+.coin.free .coin-bob{animation:none}
+.coin.free.drag{cursor:grabbing;scale:1.1}
+.coin.free.drag img{filter:drop-shadow(0 16px 14px rgba(91,42,38,.35))}
+
+/* little sparkles around the coin once it is out and waiting */
+.spark{position:absolute;width:12px;height:12px;opacity:0;pointer-events:none;background:#fff8c9;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%)}
+.spark.s1{left:-6%;top:12%}.spark.s2{right:-4%;top:2%;width:9px;height:9px}.spark.s3{right:6%;top:46%;width:8px;height:8px}
+.coin.risen:not(.free) .spark{animation:twinkle 2.2s ease-in-out infinite}
+.coin.risen:not(.free) .s2{animation-delay:.7s}.coin.risen:not(.free) .s3{animation-delay:1.4s}
+@keyframes twinkle{0%,100%{opacity:0;scale:.3}50%{opacity:1;scale:1.25}}
+
+/* ---------- progress dots + hint ---------- */
+.progress{display:flex;gap:10px;margin-top:26px;order:6}
+.progress i{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:transparent;transition:background .3s,scale .35s cubic-bezier(.34,1.56,.64,1)}
+.progress i.on{background:var(--ink);scale:1.25}
+.hint{order:7;margin:14px 0 0;min-height:1.4em;font:500 15px var(--font);color:var(--ink2);opacity:0;transform:translateY(6px);transition:opacity .5s,transform .5s}
+.hint.show{opacity:1;transform:none}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;bottom:30px;translate:-50% 20px;opacity:0;padding:12px 22px;border-radius:999px;background:#2d2d3a;color:#fff;font:500 14px var(--font);transition:.35s;z-index:2000;pointer-events:none}
+#toast.on{translate:-50% 0;opacity:1}
+
+/* ---------- smaller screens ---------- */
+@media(max-width:900px){
+  .stage{grid-template-columns:1fr;gap:34px;padding:28px 18px 60px;align-items:start}
+  .qh,.qn{font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.pop,.qc.bad,.envelope.nudge,.coin.risen .coin-bob,.coin.risen:not(.free) .spark{animation:none}
+  .lift,.qc,.fx,.env-flap,.coin.in-env,.coin.free,.ok,.progress i,.hint{transition:none}
+  .qc:hover:not(:has(.fx:hover)),.fx:hover{transform:none}
+  .spark{opacity:.9}
+}

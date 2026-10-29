@@ -6,6 +6,9 @@
 <title>Three Questions</title>
 <link rel="preload" as="image" href="coin.png">
 <link rel="preload" as="image" href="cow.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Lobster+Two:ital,wght@0,400;1,400;1,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="letter.css">
 </head>
 <body>
@@ -119,6 +122,30 @@
   </section>
 
 </main>
+
+<!-- the scratch card: slides in from the bottom once the coin is out of the envelope; the coin is the scratching tool -->
+<div class="scratch" id="scratch" aria-label="Scratch card">
+  <div class="swrap">
+    <div class="scard" id="scard">
+      <svg class="sart" viewBox="0 0 100 100" aria-hidden="true">
+        <rect width="100" height="100" fill="#ffc1af"/>
+        <path d="M0 0H100V11A50 33 0 0 1 0 11Z" fill="#fe6262"/>
+        <path d="M0 66.5C4 66.5 7 69 7 76V82C7 88 10 89.5 16 89.5C24 89.5 28 94 29.6 100H0Z" fill="#fe6262"/>
+        <path d="M100 66.5C96 66.5 93 69 93 76V82C93 88 90 89.5 84 89.5C76 89.5 72 94 70.4 100H100Z" fill="#fe6262"/>
+        <text class="st1" x="10.6" y="18.4" textLength="80.8" lengthAdjust="spacingAndGlyphs">Scratch Card</text>
+        <text class="st2" x="23.3" y="24.8" textLength="55.8" lengthAdjust="spacingAndGlyphs">Scratch to win discounts!</text>
+        <text class="st2" x="29.7" y="30.8" textLength="43.4" lengthAdjust="spacingAndGlyphs">Every Scratch wins!</text>
+        <circle cx="95.2" cy="4.6" r="4.4" fill="#b8353b"/>
+        <path d="M93.6 3L96.8 6.2M96.8 3L93.6 6.2" stroke="#fff" stroke-width="1.15" stroke-linecap="round"/>
+      </svg>
+      <div class="szone">
+        <div class="prize" aria-label="haha">haha</div>
+        <canvas id="scv" aria-hidden="true"></canvas>
+      </div>
+    </div>
+    <p class="shint" id="shint" aria-live="polite">Drag the coin over the silver to scratch</p>
+  </div>
+</div>
 
 <div id="toast" role="status" aria-live="polite"></div>
 <script src="letter.js"></script>

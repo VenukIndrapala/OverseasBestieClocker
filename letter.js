@@ -151,7 +151,7 @@ addEventListener('resize', () => {                                   // keep a l
    ---------------------------------------------------------------------
    enterScratch(): the question cards + envelope slide up (CSS, body.scratch-mode), the scratch card slides in from
    the bottom (CSS, #scratch.show), the coin shrinks to a size that suits the card.
-   The silver layer is a canvas; dragging the coin over it erases the silver and "haha" shows through.
+   The silver layer is a canvas; dragging the coin over it erases the silver and the hidden text shows through.
    ===================================================================== */
 const sc = $('#scratch'), cv = $('#scv'), ctx = cv.getContext('2d'), stage = $('.stage');
 const CW = 760, CH = 359;                                            // canvas pixels (same shape as the silver panel)

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Three Questions</title>
 <link rel="preload" as="image" href="coin.png">
+<link rel="preload" as="image" href="cow.png">
 <link rel="stylesheet" href="letter.css">
 </head>
 <body>
@@ -95,12 +96,11 @@
           <svg viewBox="0 0 300 112">
             <defs>
               <linearGradient id="gFo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fee8bf"/><stop offset="1" stop-color="#fcdfaa"/></linearGradient>
-              <radialGradient id="gSeal" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="#b3200f"/><stop offset="1" stop-color="#780a02"/></radialGradient>
               <filter id="fFlap" filterUnits="userSpaceOnUse" x="-10" y="-10" width="320" height="140"><feDropShadow dx="0" dy="2" stdDeviation="2.4" flood-color="#6b4210" flood-opacity=".32"/></filter>
-              <filter id="fSeal" filterUnits="userSpaceOnUse" x="90" y="40" width="120" height="90"><feDropShadow dx="0" dy="1.6" stdDeviation="1.6" flood-color="#3a0500" flood-opacity=".5"/></filter>
+              <filter id="fSeal" filterUnits="userSpaceOnUse" x="105" y="25" width="90" height="90"><feDropShadow dx="0" dy="1.4" stdDeviation="1.4" flood-color="#5b2a26" flood-opacity=".42"/></filter>
             </defs>
             <path filter="url(#fFlap)" d="M0 0H300L204 73.5Q150 140 96 73.5Z" fill="url(#gFo)"/>
-            <g filter="url(#fSeal)"><g transform="translate(124.8 56.4) scale(2.1)"><path fill="url(#gSeal)" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></g></g>
+            <g filter="url(#fSeal)"><image href="cow.png" x="131" y="40" width="38" height="58" preserveAspectRatio="xMidYMid meet"/></g>
           </svg>
         </div>
         <div class="face in">

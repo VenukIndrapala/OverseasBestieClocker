@@ -18,6 +18,11 @@
   --font:'Drop Line','Trebuchet MS','Segoe UI',system-ui,-apple-system,sans-serif;
   --r:22px;                 /* one corner radius for every card */
   --ex:min(400px,84vw);     /* envelope width (height is 2/3 of it) */
+
+  /* envelope opening timeline - change these two numbers to make it faster / slower */
+  --flap-t:.9s;             /* how long the flap takes to swing up */
+  --coin-delay:.5s;         /* the coin starts gliding up this long after the flap starts */
+  --coin-t:1.15s;           /* how long the coin takes to glide up */
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
@@ -70,38 +75,47 @@ ul{list-style:none;margin:0;padding:0}
 @keyframes shake{0%,100%{translate:0}20%{translate:-8px}40%{translate:7px}60%{translate:-5px}80%{translate:3px}}
 .qc.bad{animation:shake .42s ease}
 
-/* ---------- envelope ---------- */
+/* =====================================================================
+   ENVELOPE  (cream envelope, rounded-tip flap, heart seal, letter sheet inside)
+   Layers, bottom to top:  back (0)  ·  paper (0)  ·  coin (1)  ·  front folds (2)  ·  flap (3 while closed -> 0 once swung up)
+   ===================================================================== */
 .envwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding-top:calc(var(--ex)*.4)}
-.envelope{position:relative;width:var(--ex);aspect-ratio:3/2;perspective:1100px;margin:0 auto}
+.envelope{position:relative;width:var(--ex);aspect-ratio:3/2;perspective:1400px;margin:0 auto}
 .envelope.nudge{animation:nudge .5s cubic-bezier(.34,1.56,.64,1)}
 @keyframes nudge{0%{translate:0 0;rotate:0deg}30%{translate:0 -9px;rotate:-1.2deg}65%{translate:0 0;rotate:.8deg}100%{translate:0 0;rotate:0deg}}
-.env-back{position:absolute;inset:0;border-radius:4px;background:linear-gradient(135deg,#fcd0c3,#f8b9a5);box-shadow:0 18px 34px rgba(91,42,38,.2),inset 0 0 30px -6px rgba(201,86,63,.38)}
+.env-back{position:absolute;inset:0;border-radius:2px;background:linear-gradient(160deg,#f6dba9,#efd09a);box-shadow:0 18px 34px rgba(91,42,38,.22),inset 0 0 26px -8px rgba(150,100,40,.35)}
 .envwrap::after{content:"";width:calc(var(--ex)*.8);height:16px;margin-top:22px;border-radius:50%;background:rgba(91,42,38,.14);filter:blur(10px);order:5}
 
-/* the inside of the envelope (darker lining), only visible once the flap is up */
-.env-back::after{content:"";position:absolute;inset:0;clip-path:polygon(0 0,100% 0,50% 56%);background:linear-gradient(180deg,#eea08b,#f6b3a0)}
+/* the letter sheet, tucked inside the pocket */
+.paper{position:absolute;left:4.5%;right:4.5%;top:0;height:80%;z-index:0;background:linear-gradient(#f2e1c8,#f8ead6 16%,#f7e9d4);box-shadow:inset 0 8px 10px -6px rgba(140,95,40,.38)}
+.paper .orn{position:absolute;left:50%;top:13%;width:19%;translate:-50% 0;overflow:visible}
+.paper .ln{position:absolute;left:13%;right:13%;height:2px;border-radius:2px;background:rgba(110,80,60,.24)}
+.paper .l1{top:26%}.paper .l2{top:32%;right:26%}
 
-/* the three front folds (the closed flap fills the top triangle) */
-.env-front{position:absolute;inset:0;z-index:2;border-radius:4px;overflow:hidden;pointer-events:none}
-.env-front i{position:absolute;inset:0;display:block}
-.f-left{clip-path:polygon(0 0,51% 56%,0 100%);background:linear-gradient(100deg,#fcc7b6,#f8b19c)}
-.f-right{clip-path:polygon(100% 0,49% 56%,100% 100%);background:linear-gradient(260deg,#fcc7b6,#f6ad98)}
-.f-bottom{clip-path:polygon(0 100%,50% 54%,100% 100%);background:linear-gradient(0deg,#f7ab96,#fcc4b2)}
+/* the front folds */
+.env-front{position:absolute;inset:0;z-index:2;border-radius:2px;overflow:hidden;pointer-events:none}
+.env-front svg{display:block;width:100%;height:100%}
 
-/* the flap: outer face (with the heart seal) while closed, inner face once flipped open */
-.env-flap{position:absolute;left:0;top:0;width:100%;height:56%;z-index:3;transform-origin:50% 0;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.5,0,.25,1);pointer-events:none}
-.env-flap .face{position:absolute;inset:0;clip-path:polygon(0 0,100% 0,50% 100%);backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.env-flap .out{background:linear-gradient(180deg,#fcc6b4 0%,#f6a893 100%)}
-.env-flap .in{background:linear-gradient(180deg,#eb9078,#f4a691);transform:rotateX(180deg)}
-.seal{position:absolute;left:50%;top:52%;width:15%;aspect-ratio:1;translate:-50% -50%;fill:var(--accent);filter:drop-shadow(0 3px 3px rgba(91,42,38,.35))}
-.envelope.open .env-flap{transform:rotateX(-180deg)}
-.envelope.flap-back .env-flap{z-index:0}            /* once it has swung over, it sits behind the coin */
+/* the flap. Closed: sits on top of everything with the heart seal. Open: swings 180deg about its top edge and lands above the envelope.
+   Two animations run together, both with the SAME duration:
+     flapSwing  - the rotation, with a symmetrical ease so it is exactly edge-on (90deg) at the 50% mark
+     flapLayer  - moves the flap from the top layer to the bottom layer at exactly that 50% mark, when it is a hairline,
+                  so there is no visible "pop" (the old version swapped layers at about 45deg, which did pop). */
+.env-flap{position:absolute;left:0;top:0;width:100%;height:56%;z-index:3;transform-origin:50% 0;transform-style:preserve-3d;pointer-events:none;will-change:transform}
+.env-flap .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.env-flap .face svg{display:block;width:100%;height:100%;overflow:visible}
+.env-flap .in{transform:rotateY(180deg)}           /* flips side-to-side only, so the rounded tip stays where it belongs */
+.envelope.open .env-flap{animation:flapSwing var(--flap-t) cubic-bezier(.6,0,.4,1) both,flapLayer var(--flap-t) linear both}
+@keyframes flapSwing{from{transform:rotateX(0deg)}to{transform:rotateX(-180deg)}}
+@keyframes flapLayer{0%,49.9%{z-index:3}50%,100%{z-index:0}}
 
 /* ---------- the coin ---------- */
 .coin{position:absolute;left:32%;top:30%;width:36%;aspect-ratio:1;z-index:1;touch-action:none;-webkit-user-select:none;user-select:none;outline:none}
 .coin-bob{width:100%;height:100%;transform-origin:50% 60%;transition:rotate .12s linear}
 .coin img{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 6px 7px rgba(91,42,38,.38))}
-.coin.in-env{transition:transform 1s cubic-bezier(.2,.9,.25,1.12)}
+/* waits hidden behind the bottom fold, then glides up out of the pocket once the flap is over */
+.coin.in-env{transform:translateY(28%);transition:transform var(--coin-t) cubic-bezier(.22,.8,.26,1) var(--coin-delay);will-change:transform}
+.envelope.open .coin.in-env{transform:translateY(-58%)}
 .coin.risen{transform:translateY(-58%);cursor:grab}
 .coin.risen .coin-bob{animation:bob 2.8s ease-in-out infinite}
 @keyframes bob{0%,100%{translate:0 0;rotate:-1.5deg}50%{translate:0 -4px;rotate:1.5deg}}
@@ -138,7 +152,8 @@ ul{list-style:none;margin:0;padding:0}
 }
 @media(prefers-reduced-motion:reduce){
   .reveal,.pop,.qc.bad,.envelope.nudge,.coin.risen .coin-bob,.coin.risen:not(.free) .spark{animation:none}
-  .lift,.qc,.fx,.env-flap,.coin.in-env,.coin.free,.ok,.progress i,.hint{transition:none}
+  .lift,.qc,.fx,.coin.in-env,.coin.free,.ok,.progress i,.hint{transition:none}
+  .envelope.open .env-flap{animation:none;transform:rotateX(-180deg);z-index:0}
   .qc:hover:not(:has(.fx:hover)),.fx:hover{transform:none}
   .spark{opacity:.9}
 }

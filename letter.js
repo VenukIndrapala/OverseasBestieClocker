@@ -52,17 +52,26 @@ $('#qlist').addEventListener('keydown', e => {
 });
 $('#qlist').addEventListener('click', e => { const b = e.target.closest('.qbtn'); if (b) check(b.closest('.qc')); });
 
-/* ---------------- the envelope opens ---------------- */
+/* ---------------- the envelope opens ----------------
+   The whole sequence now lives in CSS (see letter.css, "ENVELOPE"):
+     1. the flap swings up (the layer change happens by itself at the exact moment it is edge-on, so nothing pops)
+     2. the coin glides up out of the pocket a moment later
+   JS only switches it on with one class, then waits for the coin's glide to finish before allowing it to be grabbed.
+   The old version used a chain of setTimeouts to swap layers mid-swing, which is what made the opening look jumpy. */
 function openEnvelope() {
   if (opened) return; opened = true;
-  env.classList.add('open');                                         // the flap swings back
-  const t = reduce ? 0 : 1;
-  setTimeout(() => env.classList.add('flap-back'), 330 * t);         // once it is over the top it sits behind the coin
-  setTimeout(() => {                                                 // the coin slides up out of the pocket
-    coin.classList.add('risen'); coin.tabIndex = 0;
+
+  const settle = () => {                                             // the coin has arrived: it can be grabbed now
+    if (ready) return; ready = true;
+    coin.removeEventListener('transitionend', onEnd);
+    coin.classList.add('risen'); coin.tabIndex = 0;                  // same resting position, so there is no visual jump
     hint.textContent = 'Drag the coin out'; hint.classList.add('show');
-  }, 800 * t);
-  setTimeout(() => { ready = true; }, 1500 * t);                     // it can be grabbed once it has settled
+  };
+  const onEnd = e => { if (e.target === coin && e.propertyName === 'transform') settle(); };
+  coin.addEventListener('transitionend', onEnd);
+  setTimeout(settle, reduce ? 0 : 2300);                             // safety net in case transitionend never fires
+
+  env.classList.add('open');                                         // go
 }
 
 /* ---------------- dragging the coin ---------------- */

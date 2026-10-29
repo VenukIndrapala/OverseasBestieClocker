@@ -80,42 +80,50 @@ function openEnvelope() {
   env.classList.add('open');                                         // go
 }
 
-/* ---------------- dragging the coin ---------------- */
-let drag = null;
-const docW = () => Math.max(document.documentElement.scrollWidth, innerWidth);
-const docH = () => Math.max(document.documentElement.scrollHeight, innerHeight);
-const clampX = (x, w) => Math.max(0, Math.min(x, docW() - w));
-const clampY = (y, h) => Math.max(0, Math.min(y, docH() - h));
+/* ---------------- dragging the coin ----------------
+   Once the coin is out it is a loose piece fixed to the screen. Everything is measured from its CENTRE, so it can
+   shrink (--cs) for the scratch card without jumping under the pointer. */
+let drag = null, cs = 1;
+const coinW = () => coin.offsetWidth;                                // layout size (before the scale)
+const half = () => coinW() * cs / 2;                                 // visible radius
+const centre = () => { const r = coin.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+function setCentre(cx, cy) {                                         // moves the coin so its centre is at (cx, cy), kept on screen
+  const W = coinW(), h = half();
+  cx = Math.max(h, Math.min(cx, innerWidth - h)); cy = Math.max(h, Math.min(cy, innerHeight - h));
+  coin.style.left = (cx - W / 2) + 'px'; coin.style.top = (cy - W / 2) + 'px';
+  return [cx, cy];
+}
 
 function freeCoin() {                                                // take the coin out of the envelope: it becomes a loose piece on the page
   if (coin.classList.contains('free')) return;
   const r = coin.getBoundingClientRect();
   coin.classList.remove('in-env', 'risen');
   coin.classList.add('free');
-  Object.assign(coin.style, { left: (r.left + scrollX) + 'px', top: (r.top + scrollY) + 'px', width: r.width + 'px', height: r.width + 'px' });
+  Object.assign(coin.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.width + 'px' });
   document.body.appendChild(coin);                                   // on top of everything, so it can pass over the cards
   hint.classList.remove('show');
   setTimeout(() => { hint.textContent = ''; }, 500);
+  enterScratch();                                                    // the coin is out: the old cards leave, the scratch card arrives
 }
 
 coin.addEventListener('pointerdown', e => {
   if (!ready || (e.pointerType === 'mouse' && e.button !== 0)) return;
   e.preventDefault();
   freeCoin();
-  const r = coin.getBoundingClientRect();
-  drag = { dx: e.clientX - r.left, dy: e.clientY - r.top, w: r.width, h: r.height, lastX: e.clientX, tilt: 0 };
+  const c = centre();
+  drag = { ox: e.clientX - c[0], oy: e.clientY - c[1], lastX: e.clientX, tilt: 0 };
   coin.classList.add('drag');
 });
 window.addEventListener('pointermove', e => {
   if (!drag) return;
-  coin.style.left = clampX(e.clientX + scrollX - drag.dx, drag.w) + 'px';
-  coin.style.top = clampY(e.clientY + scrollY - drag.dy, drag.h) + 'px';
+  const c = setCentre(e.clientX - drag.ox, e.clientY - drag.oy);
+  scratchAt(c[0], c[1]);
   const vx = e.clientX - drag.lastX; drag.lastX = e.clientX;         // it leans a little the way it is being pulled
   drag.tilt = Math.max(-14, Math.min(14, drag.tilt * .6 + vx * .9));
   coin.firstElementChild.style.rotate = drag.tilt + 'deg';
 });
 function drop() {
-  if (!drag) return; drag = null;
+  if (!drag) return; drag = null; lastPt = null;
   coin.classList.remove('drag');
   coin.firstElementChild.style.rotate = '0deg';
   if (!reduce) coin.firstElementChild.animate([{ scale: 1.08 }, { scale: .95, offset: .55 }, { scale: 1 }], { duration: 380, easing: 'ease-out' });   // a little settle
@@ -129,17 +137,80 @@ coin.addEventListener('keydown', e => {
   const step = e.shiftKey ? 60 : 16, mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); freeCoin(); return; }
   if (!mv) return; e.preventDefault(); freeCoin();
-  const r = coin.getBoundingClientRect();
-  coin.style.left = clampX(r.left + scrollX + mv[0], r.width) + 'px';
-  coin.style.top = clampY(r.top + scrollY + mv[1], r.height) + 'px';
+  const c = centre(), n = setCentre(c[0] + mv[0], c[1] + mv[1]);
+  scratchAt(n[0], n[1]);
 });
 
 addEventListener('resize', () => {                                   // keep a loose coin on screen
   if (!coin.classList.contains('free')) return;
-  const r = coin.getBoundingClientRect();
-  coin.style.left = clampX(r.left + scrollX, r.width) + 'px';
-  coin.style.top = clampY(r.top + scrollY, r.height) + 'px';
+  const c = centre(); setCentre(c[0], c[1]);
 });
+
+/* =====================================================================
+   SCRATCH MODE
+   ---------------------------------------------------------------------
+   enterScratch(): the question cards + envelope slide up (CSS, body.scratch-mode), the scratch card slides in from
+   the bottom (CSS, #scratch.show), the coin shrinks to a size that suits the card.
+   The silver layer is a canvas; dragging the coin over it erases the silver and "haha" shows through.
+   ===================================================================== */
+const sc = $('#scratch'), cv = $('#scv'), ctx = cv.getContext('2d'), stage = $('.stage');
+const CW = 760, CH = 359;                                            // canvas pixels (same shape as the silver panel)
+cv.width = CW; cv.height = CH;
+let scratchOn = false, scratchLive = false, cleared = false, lastPt = null, checkT = 0;
+
+function drawSilver() {
+  ctx.globalCompositeOperation = 'source-over';
+  const g = ctx.createLinearGradient(0, 0, CW, 0);                   // the metallic base: light in the middle, darker toward the right end
+  [[0, '#d5d7df'], [.22, '#eceef4'], [.55, '#e3e5ec'], [.84, '#d8dae1'], [1, '#c3c6ce']].forEach(([o, c]) => g.addColorStop(o, c));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, CW, CH);
+  const sh = ctx.createLinearGradient(0, 0, CW * .8, CH);            // a soft diagonal sheen
+  sh.addColorStop(0, 'rgba(255,255,255,.5)'); sh.addColorStop(.5, 'rgba(255,255,255,0)'); sh.addColorStop(1, 'rgba(255,255,255,.22)');
+  ctx.fillStyle = sh; ctx.fillRect(0, 0, CW, CH);
+
+  ctx.strokeStyle = 'rgba(120,124,140,.42)'; ctx.lineWidth = 2.2;    // the wavy lines
+  for (let i = -3; i < 17; i++) {
+    ctx.beginPath();
+    for (let x = 0; x <= CW; x += 8) { const y = i * 26 + x * .12 + Math.sin(x / 115 + i * .05) * 18; x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = 'rgba(206,209,219,.96)';                           // the "Scratch & Win" disc
+  ctx.beginPath(); ctx.arc(CW / 2, CH / 2, CH * .31, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#9a9eaa'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '400 37px "Lobster Two", "Lobster", cursive';
+  ctx.fillText('Scratch', CW / 2, CH / 2 - 42); ctx.fillText('&', CW / 2, CH / 2 + 1); ctx.fillText('Win', CW / 2, CH / 2 + 44);
+}
+drawSilver();
+if (document.fonts && document.fonts.load) {                         // draw again once the fonts have arrived
+  Promise.all([document.fonts.load('400 37px "Lobster Two"'), document.fonts.load('400 20px "Lobster"')]).then(() => { if (!cleared && !lastPt) drawSilver(); }).catch(() => {});
+}
+
+function enterScratch() {
+  if (scratchOn) return; scratchOn = true;
+  document.body.classList.add('scratch-mode');                       // question cards + envelope slide up
+  sc.classList.add('show');                                          // scratch card slides in from the bottom
+  cs = Math.min(1, 76 / coinW());                                    // the coin shrinks to about 76px across
+  coin.style.setProperty('--cs', cs);
+  setTimeout(() => { scratchLive = true; }, reduce ? 0 : 1350);      // scratching works once the card has landed
+  setTimeout(() => { stage.hidden = true; scrollTo(0, 0); const c = centre(); setCentre(c[0], c[1]); }, reduce ? 0 : 1300);   // the old page is gone
+}
+
+function scratchAt(cx, cy) {                                         // erase the silver under the coin
+  if (!scratchLive || cleared) return;
+  const z = cv.getBoundingClientRect(), k = CW / z.width;
+  const x = (cx - z.left) * k, y = (cy - z.top) * k, rad = half() * .9 * k;
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.lineCap = ctx.lineJoin = 'round'; ctx.lineWidth = rad * 2;
+  ctx.beginPath(); ctx.moveTo(lastPt ? lastPt.x : x, lastPt ? lastPt.y : y); ctx.lineTo(x, y); ctx.stroke();
+  lastPt = { x, y };
+  if (!checkT) checkT = setTimeout(checkCleared, 180);
+}
+function checkCleared() {                                           // once about half the silver is gone, the rest fades away
+  checkT = 0; if (cleared) return;
+  const d = ctx.getImageData(0, 0, CW, CH).data; let n = 0, tot = 0;
+  for (let i = 3; i < d.length; i += 32) { tot++; if (d[i] < 40) n++; }
+  if (n / tot > .5) { cleared = true; cv.classList.add('gone'); sc.classList.add('cleared'); }
+}
 
 /* click "pop" feedback */
 document.addEventListener('click', e => { const m = e.target.closest('[data-pop]'); if (!m) return; m.classList.remove('pop'); void m.offsetWidth; m.classList.add('pop'); });

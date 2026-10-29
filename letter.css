@@ -76,7 +76,7 @@ ul{list-style:none;margin:0;padding:0}
 .qc.bad{animation:shake .42s ease}
 
 /* =====================================================================
-   ENVELOPE  (cream envelope, rounded-tip flap, heart seal, letter sheet inside)
+   ENVELOPE  (cream envelope, rounded-tip flap, cow seal, letter sheet inside)
    Layers, bottom to top:  back (0)  ·  paper (0)  ·  coin (1)  ·  front folds (2)  ·  flap (3 while closed -> 0 once swung up)
    ===================================================================== */
 .envwrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding-top:calc(var(--ex)*.4)}
@@ -96,7 +96,7 @@ ul{list-style:none;margin:0;padding:0}
 .env-front{position:absolute;inset:0;z-index:2;border-radius:2px;overflow:hidden;pointer-events:none}
 .env-front svg{display:block;width:100%;height:100%}
 
-/* the flap. Closed: sits on top of everything with the heart seal. Open: swings 180deg about its top edge and lands above the envelope.
+/* the flap. Closed: sits on top of everything with the cow seal. Open: swings 180deg about its top edge and lands above the envelope.
    Two animations run together, both with the SAME duration:
      flapSwing  - the rotation, with a symmetrical ease so it is exactly edge-on (90deg) at the 50% mark
      flapLayer  - moves the flap from the top layer to the bottom layer at exactly that 50% mark, when it is a hairline,

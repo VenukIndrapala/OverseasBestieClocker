@@ -31,9 +31,37 @@
   .pumpkin.show .pslide{translate:0 0}
   .pstage{position:relative;width:min(440px,88vw,62vh);aspect-ratio:1}
   .pshadow,.pgroup,.pl{position:absolute;inset:0}
+  /* A warm inner shell sits behind the removable ribs. It fills the gaps
+     revealed as the pumpkin breaks, instead of exposing the page behind it. */
+  .pgroup{isolation:isolate}
+  .pinterior{
+    position:absolute;z-index:0;inset:29% 19% 9%;
+    border-radius:48% 48% 43% 43% / 34% 34% 48% 48%;
+    background:
+      radial-gradient(ellipse at 50% 43%,rgba(255,174,67,.28) 0 8%,transparent 38%),
+      radial-gradient(ellipse at 50% 58%,#4a1d0a 0%,#71300d 24%,#9c410b 48%,#bd570d 68%,#7b2a08 100%);
+    box-shadow:inset 0 8px 18px rgba(35,12,2,.72),inset 0 -10px 16px rgba(255,139,29,.22),0 2px 8px rgba(35,12,2,.25);
+    pointer-events:none;
+  }
+  .pinterior:before{
+    content:"";position:absolute;inset:12% 13% 13%;border-radius:50%;
+    background:
+      radial-gradient(ellipse 5px 9px at 24% 38%,#f4c17a 0 48%,#a65a25 58%,transparent 72%),
+      radial-gradient(ellipse 5px 9px at 43% 61%,#f4c17a 0 48%,#a65a25 58%,transparent 72%),
+      radial-gradient(ellipse 5px 9px at 64% 35%,#f4c17a 0 48%,#a65a25 58%,transparent 72%),
+      radial-gradient(ellipse 5px 9px at 76% 66%,#f4c17a 0 48%,#a65a25 58%,transparent 72%),
+      radial-gradient(ellipse at 50% 50%,rgba(38,13,4,.48),transparent 72%);
+    opacity:.7;
+  }
+  .pinterior:after{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:linear-gradient(105deg,transparent 25%,rgba(255,177,71,.13) 48%,transparent 68%);
+    mix-blend-mode:screen;
+  }
+  .pgroup>.pl{z-index:1}
   .pshadow{background:var(--ps) center/100% 100% no-repeat}
   .pl{background:var(--pi) center/100% 100% no-repeat;pointer-events:none}
-  .pl.fall{will-change:transform}
+  .pl.fall{will-change:transform;filter:drop-shadow(0 7px 5px rgba(30,12,2,.38))}
   .phint{margin:0;min-height:1.4em;font:500 15px var(--font);color:var(--ink2);opacity:0;transition:opacity .5s 1.8s}
   .pumpkin.show .phint{opacity:1}
   .pumpkin .phint.hide{opacity:0;transition-delay:0s}
@@ -80,6 +108,10 @@
 
   function build() {
     if (built) return; built = true;
+    // Add the dark orange inner flesh first, underneath the stem and all five ribs.
+    const inside = document.createElement('div');
+    inside.className = 'pinterior';
+    group.appendChild(inside);
     group.appendChild(layer(IMG_STEM));                  // the stem is underneath and never falls
     IMG_PIECES.forEach((src, i) => { const el = layer(src); layers[i + 1] = el; remaining.add(i + 1); group.appendChild(el); });
   }

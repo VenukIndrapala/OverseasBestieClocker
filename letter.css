@@ -1,10 +1,10 @@
-/* Drop Line - the same font file the dashboard uses.
-   Put DropLine.otf in a "fonts" folder next to this file (or in ../fonts if this page lives in a sub-folder of the dashboard repo). */
+/* Runtime font - put Runtime.otf in a "fonts" folder next to this file (or in ../fonts if this page lives in a sub-folder).
+   The family name 'Drop Line' is only an internal label that letter.js and the rules below already use, so it is kept as it is;
+   the font that actually shows is the file in the url() lines. If your file has a different name, change "Runtime.otf" here. */
 @font-face{
   font-family:'Drop Line';
-  src:local('Drop Line'),local('DropLine'),
-      url('fonts/DropLine.otf') format('opentype'),
-      url('../fonts/DropLine.otf') format('opentype');
+  src:url('fonts/Runtime.otf') format('opentype'),
+      url('../fonts/Runtime.otf') format('opentype');
   font-weight:100 900;font-style:normal;font-display:swap;
 }
 :root{

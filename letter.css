@@ -1,8 +1,7 @@
 /* Runtime font - put Runtime.otf in a "fonts" folder next to this file (or in ../fonts if this page lives in a sub-folder).
-   The family name 'Drop Line' is only an internal label that letter.js and the rules below already use, so it is kept as it is;
-   the font that actually shows is the file in the url() lines. If your file has a different name, change "Runtime.otf" here. */
+   If your file has a different name, change "Runtime.otf" in the two url() lines. */
 @font-face{
-  font-family:'Drop Line';
+  font-family:'Runtime';
   src:url('fonts/Runtime.otf') format('opentype'),
       url('../fonts/Runtime.otf') format('opentype');
   font-weight:100 900;font-style:normal;font-display:swap;
@@ -20,7 +19,7 @@
   --ink2:rgba(11,59,58,.72);/* softer text for small labels / hints */
   --accent:var(--teal);     /* focus colour */
   --panelgrad:linear-gradient(135deg,var(--mint),var(--teal));
-  --font:'Drop Line','Trebuchet MS','Segoe UI',system-ui,-apple-system,sans-serif;
+  --font:'Runtime','Trebuchet MS','Segoe UI',system-ui,-apple-system,sans-serif;
   --r:22px;                 /* one corner radius for every card */
   --ex:min(400px,84vw);     /* envelope width (height is 2/3 of it) */
 
@@ -32,6 +31,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--bg)}
 body{background:var(--bg);color:var(--ink);font:15px/1.4 var(--font);overflow-x:hidden;min-height:100vh;min-height:100dvh}
+*,*::before,*::after{font-family:var(--font)}
 button,input{font-family:var(--font)}
 button{font:inherit;color:inherit;cursor:pointer}
 [hidden]{display:none!important}

@@ -18,6 +18,7 @@
     const S = 600;
     const rm = matchMedia('(prefers-reduced-motion:reduce)').matches;
     const HX = .65, HY = .39;               // where the centre of the hammer HEAD is inside the hammer picture (the drop point)
+    const HAMMER_SRC = 'mallet.png';        // <- your transparent mallet picture, saved in the SAME folder as your index.html on GitHub
 
     /* ---------------------------------------------------------------
        PASTE YOUR PICTURE DATA HERE (data-URIs or file paths).
@@ -79,6 +80,7 @@
     .phammer{position:absolute;inset:0;transform-origin:65% 39%;touch-action:none;pointer-events:none;filter:grayscale(1) opacity(.38);transition:filter .4s;will-change:transform}
     .phammer.unlocked{pointer-events:auto;cursor:grab;filter:none;animation:phwig .7s ease .1s 1}
     .phammer.drag{cursor:grabbing;filter:drop-shadow(0 10px 8px rgba(30,12,2,.35));z-index:20}
+    .phimg{width:100%;height:100%;display:block;object-fit:contain;pointer-events:none;-webkit-user-drag:none;user-select:none}
     .phwrap.away{opacity:0}
     @keyframes phwig{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}45%{transform:rotate(11deg)}70%{transform:rotate(-6deg)}}
 
@@ -105,7 +107,7 @@
           '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 3"></button>' +
         '</div>' +
         '<p class="phint" id="phint">Tick all three boxes to unlock the hammer</p>' +
-        '<div class="phwrap" id="phwrap"><div class="phammer" id="phammer" aria-label="Hammer">' + HAMMER_SVG + '</div></div>' +
+        '<div class="phwrap" id="phwrap"><div class="phammer" id="phammer" aria-label="Hammer"><img class="phimg" id="phimg" src="' + HAMMER_SRC + '" alt="" draggable="false"></div></div>' +
       '</div>';
     document.body.appendChild(sec);
     const scene = document.createElement('section');
@@ -117,6 +119,10 @@
           stemEl = sec.querySelector('#pstem'), hint = sec.querySelector('#phint'),
           boxes = Array.from(sec.querySelectorAll('.pbox')),
           hwrap = sec.querySelector('#phwrap'), ham = sec.querySelector('#phammer');
+    /* mallet picture: match the box to the picture's shape; if the file is missing, fall back to the drawn mallet */
+    const himg = sec.querySelector('#phimg');
+    himg.addEventListener('load', () => { if (himg.naturalWidth && himg.naturalHeight) hwrap.style.aspectRatio = himg.naturalWidth + '/' + himg.naturalHeight; });
+    himg.addEventListener('error', () => { console.warn('[pumpkin] ' + HAMMER_SRC + ' not found - using the drawn mallet. Check the file name / folder.'); ham.innerHTML = HAMMER_SVG; hwrap.style.aspectRatio = '740/660'; });
     const scratchEl = document.getElementById('scratch'), coinEl = document.getElementById('coin');
     if (!scratchEl) console.warn('[pumpkin] #scratch not found - call startPumpkin() manually to test');
     if (IMG_SHADOW) stage.style.setProperty('--ps', 'url(' + IMG_SHADOW + ')');

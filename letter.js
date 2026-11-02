@@ -158,6 +158,9 @@ const CW = 760, CH = 359;                                            // canvas p
 cv.width = CW; cv.height = CH;
 let scratchOn = false, scratchLive = false, cleared = false, lastPt = null, checkT = 0;
 
+/* the canvas can not read the CSS variable, so the page font (Drop Line) is spelled out here - keep it the same as --font in letter.css */
+const CANVAS_FONT = '"Drop Line", "Trebuchet MS", "Segoe UI", system-ui, sans-serif';
+
 function drawSilver() {
   ctx.globalCompositeOperation = 'source-over';
   const g = ctx.createLinearGradient(0, 0, CW, 0);                   // the metallic base: light in the middle, darker toward the right end
@@ -177,12 +180,12 @@ function drawSilver() {
   ctx.fillStyle = 'rgba(206,209,219,.96)';                           // the "Scratch & Win" disc
   ctx.beginPath(); ctx.arc(CW / 2, CH / 2, CH * .31, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#9a9eaa'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.font = '400 37px "Lobster Two", "Lobster", cursive';
+  ctx.font = '400 37px ' + CANVAS_FONT;
   ctx.fillText('Scratch', CW / 2, CH / 2 - 42); ctx.fillText('&', CW / 2, CH / 2 + 1); ctx.fillText('Win', CW / 2, CH / 2 + 44);
 }
 drawSilver();
-if (document.fonts && document.fonts.load) {                         // draw again once the fonts have arrived
-  Promise.all([document.fonts.load('400 37px "Lobster Two"'), document.fonts.load('400 20px "Lobster"')]).then(() => { if (!cleared && !lastPt) drawSilver(); }).catch(() => {});
+if (document.fonts && document.fonts.load) {                         // draw again once the font has arrived
+  document.fonts.load('400 37px "Drop Line"').then(() => { if (!cleared && !lastPt) drawSilver(); }).catch(() => {});
 }
 
 function enterScratch() {

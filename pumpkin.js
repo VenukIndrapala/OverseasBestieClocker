@@ -106,7 +106,7 @@
     .phwrap.away{opacity:0}
     @keyframes phwig{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}45%{transform:rotate(11deg)}70%{transform:rotate(-6deg)}}
 
-    /* ---- the letter (sits inside the pumpkin; its flap opens, it flies out + enlarges, hearts rise from the bottom) ---- */
+    /* ---- the letter (sits inside the pumpkin; its flap opens, it flies out + enlarges, hearts rise) ---- */
     .lt{position:absolute;left:50%;top:60%;width:300px;height:200px;pointer-events:none;transform-origin:center center;transform:translate(-50%,-50%) scale(var(--ls,.5))}
     .lt.fly{position:fixed;left:50%;top:50%;transition:transform 1.2s cubic-bezier(.22,1,.36,1)}
     .ltlayer{position:fixed;inset:0;z-index:605;pointer-events:none}
@@ -132,15 +132,15 @@
     .lt.openenv .lt-flap{animation:lt-flapSwing .9s cubic-bezier(.6,0,.4,1) both,lt-flapLayer .9s linear both}
     @keyframes lt-flapSwing{from{transform:rotateX(0deg)}to{transform:rotateX(-180deg)}}
     @keyframes lt-flapLayer{0%,49.9%{z-index:3}50%,100%{z-index:0}}
-    /* hearts: they start at the bottom edge of the envelope and rise */
+    /* five hearts rise from fixed positions along the envelope's bottom edge */
     .lt-hearts{position:absolute;left:0;top:0;width:300px;height:200px;z-index:6;pointer-events:none;opacity:0;transition:opacity .4s}
     .lt.show .lt-hearts{opacity:1}
-    .lt-h{position:absolute;top:194px;width:var(--hs,12px);height:var(--hs,12px);background:var(--hc,#e63946);transform:rotate(-45deg);opacity:0;animation:lt-heart var(--hd,2.4s) ease-out var(--hl,0s) infinite;animation-play-state:paused}
+    .lt-h{position:absolute;top:194px;width:16px;height:16px;background:var(--hc,#e63946);transform:rotate(-45deg);opacity:0;animation:lt-heart var(--hd,1.5s) ease-in-out var(--hl,0s) infinite;animation-play-state:paused}
     .lt.show .lt-h{animation-play-state:running}
     .lt-h:before,.lt-h:after{content:"";position:absolute;width:100%;height:100%;border-radius:50%;background:inherit}
     .lt-h:before{top:-50%;left:0}
     .lt-h:after{left:50%;top:0}
-    @keyframes lt-heart{0%{transform:translate(0,0) rotate(-45deg) scale(.4);opacity:0}12%{opacity:1}100%{transform:translate(var(--hx,0),-270px) rotate(-45deg) scale(1.5);opacity:0}}
+    @keyframes lt-heart{0%{transform:translateY(0) rotate(-45deg) scale(.3);opacity:1}100%{transform:translateY(-150px) rotate(-45deg) scale(1.3);opacity:.5}}
     .lt-shadow{position:absolute;width:330px;height:25px;border-radius:50%;background:rgba(0,0,0,.3);top:225px;left:-15px;opacity:0;transition:opacity .8s;animation:lt-scale 3s ease-in-out infinite;z-index:-1}
     .lt.show .lt-shadow{opacity:1}
     @keyframes lt-scale{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.85)}}
@@ -206,19 +206,25 @@
     const placeFinal = () => { const s = finalScale(); setLT(0, (20 * s).toFixed(1), s.toFixed(3)); };
     setLs(); addEventListener('resize', () => { if (!flown) setLs(); else if (live) { lt.style.transition = 'none'; placeFinal(); } });
 
-    /* the hearts (made once, they wait invisible until the letter is enlarged) */
+    /* five hearts, fixed along the envelope and staggered like the reference animation */
     (() => {
-      const box = lt.querySelector('.lt-hearts'), cols = ['#e63946', '#ff5d73', '#d62828', '#ff8fa3', '#c1121f'];
-      for (let i = 0; i < 18; i++) {
-        const h = document.createElement('i'); h.className = 'lt-h';
-        h.style.left = rnd(10, 280).toFixed(0) + 'px';
-        h.style.setProperty('--hs', rnd(10, 18).toFixed(0) + 'px');
-        h.style.setProperty('--hc', cols[(Math.random() * cols.length) | 0]);
-        h.style.setProperty('--hd', rnd(2.2, 3.8).toFixed(2) + 's');
-        h.style.setProperty('--hl', (-rnd(0, 3.6)).toFixed(2) + 's');
-        h.style.setProperty('--hx', rnd(-26, 26).toFixed(0) + 'px');
+      const box = lt.querySelector('.lt-hearts');
+      const hearts = [
+        { left: 35, duration: 1.0, delay: 0.0, color: '#e63946' },
+        { left: 85, duration: 2.0, delay: 0.2, color: '#ff5d73' },
+        { left: 135, duration: 1.5, delay: 0.4, color: '#d62828' },
+        { left: 185, duration: 2.3, delay: 0.1, color: '#ff8fa3' },
+        { left: 235, duration: 1.7, delay: 0.3, color: '#c1121f' }
+      ];
+      hearts.forEach(spec => {
+        const h = document.createElement('i');
+        h.className = 'lt-h';
+        h.style.left = spec.left + 'px';
+        h.style.setProperty('--hd', spec.duration + 's');
+        h.style.setProperty('--hl', spec.delay + 's');
+        h.style.setProperty('--hc', spec.color);
         box.appendChild(h);
-      }
+      });
     })();
 
     /* step 1: take the letter out of the pumpkin WITHOUT moving it (so it stays when the pumpkin slides away) */

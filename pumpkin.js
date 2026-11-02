@@ -13,6 +13,9 @@
 
    If IMG_SHADOW / IMG_STEM / IMG_PIECES are empty the script draws its own pumpkin.
    Paste your own picture data into the three constants below to use your pictures.
+
+   COLOURS: the three tick boxes use the page palette (teal #1FBFAD, cream #F2E8D5, dark teal #0B3B3A, mint #DFF7F2).
+   The pumpkin and the letter envelope keep their own colours.
    ===================================================================== */
 (() => {
   const run = () => {
@@ -87,15 +90,16 @@
     .pstem{background:var(--pst) center/100% 100% no-repeat}
     .pchunk{position:absolute;pointer-events:none;will-change:transform,opacity;filter:drop-shadow(0 5px 4px rgba(30,12,2,.4))}
     .pfx{position:fixed;inset:0;width:100%;height:100%;z-index:610;pointer-events:none}
-    .phint{margin:0;min-height:1.4em;max-width:100%;text-align:center;font:500 15px var(--font,system-ui,sans-serif);color:var(--ink2,#6b5a4a);opacity:0;transition:opacity .5s 1.8s}
+    .phint{margin:0;min-height:1.4em;max-width:100%;text-align:center;font:500 15px var(--font,system-ui,sans-serif);color:var(--ink2,rgba(11,59,58,.72));opacity:0;transition:opacity .5s 1.8s}
     .pumpkin.show .phint{opacity:1}
 
-    /* the three boxes */
+    /* the three boxes (page palette: teal / cream / dark teal) */
     .pboxes{display:flex;gap:14px}
-    .pbox{appearance:none;-webkit-appearance:none;position:relative;width:40px;height:40px;padding:0;border-radius:10px;border:3px solid #d9822b;background:rgba(255,255,255,.78);cursor:pointer;transition:background .2s,border-color .2s,transform .15s}
+    .pbox{appearance:none;-webkit-appearance:none;position:relative;width:40px;height:40px;padding:0;border-radius:10px;border:3px solid #1FBFAD;background:#F2E8D5;cursor:pointer;transition:background .2s,border-color .2s,transform .15s}
     .pbox:active{transform:scale(.92)}
-    .pbox.on{background:#f28a1d;border-color:#c9540a}
-    .pbox.on::after{content:'';position:absolute;left:12px;top:4px;width:10px;height:20px;border:solid #fff;border-width:0 4px 4px 0;transform:rotate(45deg)}
+    .pbox:focus-visible{outline:2px solid #0B3B3A;outline-offset:3px}
+    .pbox.on{background:#1FBFAD;border-color:#0B3B3A}
+    .pbox.on::after{content:'';position:absolute;left:12px;top:4px;width:10px;height:20px;border:solid #DFF7F2;border-width:0 4px 4px 0;transform:rotate(45deg)}
 
     /* the hammer */
     .phwrap{position:absolute;left:calc(100% + 2px);top:8%;width:min(120px,16vw);aspect-ratio:740/660;z-index:5;pointer-events:none;transition:opacity .5s}
@@ -151,7 +155,7 @@
     .pumpkin.gone{display:none}
     .pscene{position:fixed;inset:0;z-index:560;display:grid;place-items:center;visibility:hidden;pointer-events:none;text-align:center;padding:24px}
     .pscene.show{visibility:visible}
-    .pscene h1{margin:0;font:700 clamp(34px,8vw,80px)/1.1 var(--font,system-ui,sans-serif);color:var(--ink,#3a2a1a);opacity:0;translate:0 26px;transition:opacity .7s .55s,translate .9s cubic-bezier(.22,1,.36,1) .55s}
+    .pscene h1{margin:0;font:700 clamp(34px,8vw,80px)/1.1 var(--font,system-ui,sans-serif);color:var(--ink,#0B3B3A);opacity:0;translate:0 26px;transition:opacity .7s .55s,translate .9s cubic-bezier(.22,1,.36,1) .55s}
     .pscene.show h1{opacity:1;translate:0 0}
     @media(prefers-reduced-motion:reduce){.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1,.phwrap,.phammer,.lt,.lt-paper,.lt-hearts,.lt-shadow{transition:none;animation:none}.lt-valentines,.lt-h{animation:none!important}}
     `;

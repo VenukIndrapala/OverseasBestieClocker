@@ -4,24 +4,23 @@
    ---------------------------------------------------------------------
    1. when the prize is revealed (#scratch gets "cleared") wait 5 seconds
    2. the scratch card slides up and out, the coin fades, the pumpkin slides in from the bottom
-   3. TAP THE PUMPKIN. It breaks in FIVE random jagged regions, with cracks, shards,
-      seeds and pulp falling to the ground.
-   4. when the 5th region has fallen the stem slides off to the right and the next scene appears.
+   3. THREE BOXES under the pumpkin: tick all three to unlock the hammer (on the right)
+   4. DRAG the hammer and DROP it on the pumpkin. Only the piece you drop it on breaks.
+      Do this on five different pieces. A drop on empty space / a broken piece springs back.
+   5. when the 5th piece has fallen the stem slides off to the right and the next scene appears.
 
-   FIX: if IMG_SHADOW / IMG_STEM / IMG_PIECES are empty (or fail to load) the script now
-   DRAWS ITS OWN PUMPKIN, so something always shows. If you paste your own picture data
-   into the three constants below, your pictures are used instead.
+   If IMG_SHADOW / IMG_STEM / IMG_PIECES are empty the script draws its own pumpkin.
+   Paste your own picture data into the three constants below to use your pictures.
    ===================================================================== */
 (() => {
   const run = () => {
     const WAIT_MS = 5000;
-    const BREAK_UNDER_FINGER = true;
     const S = 600;
     const rm = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const HX = .65, HY = .39;               // where the centre of the hammer HEAD is inside the hammer picture (the drop point)
 
     /* ---------------------------------------------------------------
        PASTE YOUR PICTURE DATA HERE (data-URIs or file paths).
-       Leave as '' to use the built-in drawn pumpkin.
        --------------------------------------------------------------- */
     const IMG_SHADOW = '';
     const IMG_STEM = '';
@@ -31,25 +30,57 @@
     const rnd = (a, b) => a + Math.random() * (b - a);
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
+    const HAMMER_SVG =
+      '<svg viewBox="0 0 740 660" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;overflow:visible">' +
+      '<defs>' +
+      '<linearGradient id="phH" gradientUnits="userSpaceOnUse" x1="250" y1="130" x2="640" y2="440">' +
+      '<stop offset="0" stop-color="#e03a1c"/><stop offset=".08" stop-color="#d40000"/><stop offset=".15" stop-color="#ad1800"/>' +
+      '<stop offset=".22" stop-color="#e6381b"/><stop offset=".30" stop-color="#d90000"/><stop offset=".62" stop-color="#d90000"/>' +
+      '<stop offset=".70" stop-color="#e6381b"/><stop offset=".78" stop-color="#ad1800"/><stop offset=".85" stop-color="#d40000"/>' +
+      '<stop offset=".92" stop-color="#e6381b"/><stop offset="1" stop-color="#c63a1c"/></linearGradient>' +
+      '<linearGradient id="phG" gradientUnits="userSpaceOnUse" x1="110" y1="620" x2="420" y2="330">' +
+      '<stop offset="0" stop-color="#fcd22c"/><stop offset=".25" stop-color="#e3b41d"/><stop offset="1" stop-color="#fcd22c"/></linearGradient>' +
+      '</defs>' +
+      '<polygon points="380,312 426,353 132,628 116,626 108,606" fill="url(#phG)"/>' +
+      '<polygon points="393,30 418,40 519,121 523,152 598,192 615,216 695,312 706,343 560,488 534,480 432,396 425,366 338,300 255,198 248,176" fill="url(#phH)"/>' +
+      '<polygon points="380,312 395,312 426,350 418,362 405,350" fill="#e0b21c"/>' +
+      '<polygon points="549,138 598,188 596,196 575,215 521,158 522,152" fill="#fcc82b"/>' +
+      '<polygon points="549,138 598,188 596,196 560,160" fill="#f29a2a"/>' +
+      '</svg>';
+
     /* ---------- styles ---------- */
     const st = document.createElement('style');
     st.textContent = `
     .scratch.out .swrap{translate:0 -125vh;transition:translate .95s cubic-bezier(.65,0,.35,1)}
     .coin.free.gone{opacity:0;pointer-events:none;transition:opacity .4s,scale .5s}
 
-    .pumpkin{position:fixed;inset:0;z-index:600;display:grid;place-items:center;visibility:hidden;pointer-events:none;touch-action:none;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+    .pumpkin{--sw:min(440px,64vw,52vh);position:fixed;inset:0;z-index:600;display:grid;place-items:center;visibility:hidden;pointer-events:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
     .pumpkin.show{visibility:visible;pointer-events:auto}
-    .pslide{display:flex;flex-direction:column;align-items:center;gap:18px;translate:0 115vh;transition:translate 1.05s cubic-bezier(.22,1,.36,1) .8s}
+    .pslide{position:relative;width:var(--sw);display:flex;flex-direction:column;align-items:center;gap:16px;translate:0 115vh;transition:translate 1.05s cubic-bezier(.22,1,.36,1) .8s}
     .pumpkin.show .pslide{translate:0 0}
-    .pstage{position:relative;width:min(440px,88vw,62vh);aspect-ratio:1}
+    .pstage{position:relative;width:var(--sw);aspect-ratio:1}
     .pshadow,.pstem,.pbody,.pcrack{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
     .pshadow{background:var(--ps) center/100% 100% no-repeat;transition:opacity .9s ease}
     .pstem{background:var(--pst) center/100% 100% no-repeat}
     .pchunk{position:absolute;pointer-events:none;will-change:transform,opacity;filter:drop-shadow(0 5px 4px rgba(30,12,2,.4))}
     .pfx{position:fixed;inset:0;width:100%;height:100%;z-index:610;pointer-events:none}
-    .phint{margin:0;min-height:1.4em;font:500 15px var(--font,system-ui,sans-serif);color:var(--ink2,#6b5a4a);opacity:0;transition:opacity .5s 1.8s}
+    .phint{margin:0;min-height:1.4em;max-width:100%;text-align:center;font:500 15px var(--font,system-ui,sans-serif);color:var(--ink2,#6b5a4a);opacity:0;transition:opacity .5s 1.8s}
     .pumpkin.show .phint{opacity:1}
-    .pumpkin .phint.hide{opacity:0;transition-delay:0s}
+
+    /* the three boxes */
+    .pboxes{display:flex;gap:14px}
+    .pbox{appearance:none;-webkit-appearance:none;position:relative;width:40px;height:40px;padding:0;border-radius:10px;border:3px solid #d9822b;background:rgba(255,255,255,.78);cursor:pointer;transition:background .2s,border-color .2s,transform .15s}
+    .pbox:active{transform:scale(.92)}
+    .pbox.on{background:#f28a1d;border-color:#c9540a}
+    .pbox.on::after{content:'';position:absolute;left:12px;top:4px;width:10px;height:20px;border:solid #fff;border-width:0 4px 4px 0;transform:rotate(45deg)}
+
+    /* the hammer */
+    .phwrap{position:absolute;left:calc(100% + 2px);top:8%;width:min(120px,16vw);aspect-ratio:740/660;z-index:5;pointer-events:none;transition:opacity .5s}
+    .phammer{position:absolute;inset:0;transform-origin:65% 39%;touch-action:none;pointer-events:none;filter:grayscale(1) opacity(.38);transition:filter .4s;will-change:transform}
+    .phammer.unlocked{pointer-events:auto;cursor:grab;filter:none;animation:phwig .7s ease .1s 1}
+    .phammer.drag{cursor:grabbing;filter:drop-shadow(0 10px 8px rgba(30,12,2,.35));z-index:20}
+    .phwrap.away{opacity:0}
+    @keyframes phwig{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}45%{transform:rotate(11deg)}70%{transform:rotate(-6deg)}}
 
     .pumpkin.exit{pointer-events:none}
     .pumpkin.exit .pslide{translate:125vw 0;transition:translate .95s cubic-bezier(.65,0,.35,1)}
@@ -58,15 +89,24 @@
     .pscene.show{visibility:visible}
     .pscene h1{margin:0;font:700 clamp(34px,8vw,80px)/1.1 var(--font,system-ui,sans-serif);color:var(--ink,#3a2a1a);opacity:0;translate:0 26px;transition:opacity .7s .55s,translate .9s cubic-bezier(.22,1,.36,1) .55s}
     .pscene.show h1{opacity:1;translate:0 0}
-    @media(prefers-reduced-motion:reduce){.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1{transition:none}}
+    @media(prefers-reduced-motion:reduce){.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1,.phwrap,.phammer{transition:none;animation:none}}
     `;
     document.head.appendChild(st);
 
     /* ---------- markup ---------- */
     const sec = document.createElement('section');
-    sec.className = 'pumpkin'; sec.setAttribute('aria-label', 'Pumpkin. Tap it to break it.');
-    sec.innerHTML = '<div class="pslide"><div class="pstage" id="pstage"><div class="pshadow" id="pshadow"></div><div class="pstem" id="pstem"></div></div>' +
-                    '<p class="phint" id="phint">Tap the pumpkin to break it</p></div>';
+    sec.className = 'pumpkin'; sec.setAttribute('aria-label', 'Pumpkin. Tick the three boxes, then drag the hammer onto the pumpkin.');
+    sec.innerHTML =
+      '<div class="pslide">' +
+        '<div class="pstage" id="pstage"><div class="pshadow" id="pshadow"></div><div class="pstem" id="pstem"></div></div>' +
+        '<div class="pboxes" id="pboxes">' +
+          '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 1"></button>' +
+          '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 2"></button>' +
+          '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 3"></button>' +
+        '</div>' +
+        '<p class="phint" id="phint">Tick all three boxes to unlock the hammer</p>' +
+        '<div class="phwrap" id="phwrap"><div class="phammer" id="phammer" aria-label="Hammer">' + HAMMER_SVG + '</div></div>' +
+      '</div>';
     document.body.appendChild(sec);
     const scene = document.createElement('section');
     scene.className = 'pscene'; scene.setAttribute('aria-label', 'Next scene');
@@ -74,7 +114,9 @@
     document.body.appendChild(scene);
 
     const stage = sec.querySelector('#pstage'), shadowEl = sec.querySelector('#pshadow'),
-          stemEl = sec.querySelector('#pstem'), hint = sec.querySelector('#phint');
+          stemEl = sec.querySelector('#pstem'), hint = sec.querySelector('#phint'),
+          boxes = Array.from(sec.querySelectorAll('.pbox')),
+          hwrap = sec.querySelector('#phwrap'), ham = sec.querySelector('#phammer');
     const scratchEl = document.getElementById('scratch'), coinEl = document.getElementById('coin');
     if (!scratchEl) console.warn('[pumpkin] #scratch not found - call startPumpkin() manually to test');
     if (IMG_SHADOW) stage.style.setProperty('--ps', 'url(' + IMG_SHADOW + ')');
@@ -89,6 +131,7 @@
 
     /* ---------- state ---------- */
     let built = false, buildP = null, starting = false, started = false, ready = false, won = false;
+    let unlocked = false, busy = false, drag = null, hintTimer = 0;
     let body, bctx, srcData, op, opIdx, label, chunkId, goneA, rdA, stemA;
     let regPix = [], regCent = [], regSeed = [], regArea = [], chunks = [];
     let totalArea = 1, pcx = S / 2, pcy = S / 2, shadowG = .9, stemOrigin = '50% 20%';
@@ -167,7 +210,7 @@
       if (!buildP) {
         buildP = Promise.all([IMG_SHADOW, IMG_STEM].concat(IMG_PIECES).map(loadImg)).then(r => {
           let sh = r[0], stm = r[1], pcs = r.slice(2);
-          if (!pcs.some(Boolean)) {                         // no usable pumpkin picture -> draw one
+          if (!pcs.some(Boolean)) {
             const f = fallbackPumpkin();
             sh = f.sh; stm = f.stm; pcs = [f.bd];
             stage.style.setProperty('--ps', 'url(' + f.sh.toDataURL() + ')');
@@ -415,6 +458,7 @@
           { transform: 'translate(0,0) rotate(0)' }], { duration: 380, easing: 'ease-out' });
         stemEl.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(' + (Math.random() < .5 ? -2.4 : 2.4) + 'deg)', offset: .3 }, { transform: 'rotate(' + (Math.random() < .5 ? -.8 : .8) + 'deg)', offset: .65 }, { transform: 'rotate(0)' }], { duration: 520, easing: 'ease-out' });
       }
+      updateHint();
       if (removed.every(Boolean)) win();
     }
 
@@ -536,34 +580,102 @@
       else pctx.clearRect(0, 0, innerWidth, innerHeight);
     }
 
-    /* ---------- tapping ---------- */
-    sec.addEventListener('pointerdown', e => {
-      if (!ready || won || !built || (e.pointerType === 'mouse' && e.button !== 0)) return;
-      e.preventDefault();
-      const r = stage.getBoundingClientRect();
-      const px = Math.round((e.clientX - r.left) / r.width * S), py = Math.round((e.clientY - r.top) / r.height * S);
-      if (px < 0 || py < 0 || px >= S || py >= S) return;
-      const i = py * S + px;
-      if (!(op[i] || stemA[i] > 20)) return;
-      const alive = id => !removed[id] && !cracking.has(id);
-      let id = -1;
-      if (BREAK_UNDER_FINGER && op[i] && alive(label[i])) id = label[i];
-      if (id < 0) {
-        const cand = [0, 1, 2, 3, 4].filter(alive);
-        if (!cand.length) return;
-        if (BREAK_UNDER_FINGER) {
-          let best = 1e12;
-          cand.forEach(c => { const d = Math.hypot(regCent[c][0] - px, regCent[c][1] - py); if (d < best) { best = d; id = c; } });
-        } else id = cand[(Math.random() * cand.length) | 0];
+    /* ---------- hint text ---------- */
+    function updateHint() {
+      const left = 5 - removed.filter(Boolean).length;
+      if (won) { hint.textContent = ''; return; }
+      if (!unlocked) hint.textContent = 'Tick all three boxes to unlock the hammer';
+      else if (left === 5) hint.textContent = 'Drag the hammer onto the pumpkin and drop it';
+      else hint.textContent = left + ' more \u2013 drop the hammer on another spot';
+    }
+    function flashHint(msg) {
+      hint.textContent = msg;
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(updateHint, 2200);
+    }
+
+    /* ---------- the three boxes ---------- */
+    boxes.forEach(b => b.addEventListener('click', () => {
+      if (!ready || b.classList.contains('on')) return;
+      b.classList.add('on'); b.setAttribute('aria-checked', 'true');
+      if (boxes.every(x => x.classList.contains('on'))) {
+        unlocked = true;
+        ham.classList.add('unlocked');
+        updateHint();
       }
-      hint.classList.add('hide');
-      const inside = op[i] && label[i] === id;
-      startCrack(id, inside ? px : regSeed[id][0], inside ? py : regSeed[id][1]);
+    }));
+
+    /* ---------- the hammer: drag it, drop it, the piece under the hammer head breaks ---------- */
+    const setT = (dx, dy, s, rot) => { ham.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + s + ') rotate(' + rot + 'deg)'; };
+
+    /* which piece is under the drop point? returns {id, px, py} or null */
+    function findTarget(hx, hy) {
+      if (!built) return null;
+      const r = stage.getBoundingClientRect();
+      const px = Math.round((hx - r.left) / r.width * S), py = Math.round((hy - r.top) / r.height * S);
+      if (px < 0 || py < 0 || px >= S || py >= S) return null;
+      const i = py * S + px;
+      if (!(op[i] || stemA[i] > 20)) return null;                        // empty space around the pumpkin
+      const alive = id => !removed[id] && !cracking.has(id);
+      if (op[i]) return alive(label[i]) ? { id: label[i], px, py } : null;   // already broken piece -> no
+      let id = -1, best = 1e12;                                           // stem: nearest piece that is still whole
+      [0, 1, 2, 3, 4].filter(alive).forEach(c => { const d = Math.hypot(regCent[c][0] - px, regCent[c][1] - py); if (d < best) { best = d; id = c; } });
+      return id < 0 ? null : { id, px: regSeed[id][0], py: regSeed[id][1] };
+    }
+
+    function goHome() {
+      if (won) { busy = false; return; }
+      ham.classList.remove('drag');
+      if (rm) { ham.style.transition = ''; ham.style.transform = ''; busy = false; return; }
+      ham.style.transition = 'transform .5s cubic-bezier(.22,1,.36,1)';
+      ham.style.transform = '';
+      setTimeout(() => { ham.style.transition = ''; busy = false; }, 520);
+    }
+
+    ham.addEventListener('pointerdown', e => {
+      if (!unlocked || busy || won || !built || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      e.preventDefault();
+      const r = ham.getBoundingClientRect();
+      drag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, hx: r.left + r.width * HX, hy: r.top + r.height * HY, dx: 0, dy: 0 };
+      try { ham.setPointerCapture(e.pointerId); } catch (_) {}
+      ham.style.animation = 'none';
+      ham.style.transition = 'none';
+      ham.classList.add('drag');
+      setT(0, 0, 1.5, -8);
     });
+    ham.addEventListener('pointermove', e => {
+      if (!drag || e.pointerId !== drag.id) return;
+      drag.dx = e.clientX - drag.sx; drag.dy = e.clientY - drag.sy;
+      setT(drag.dx.toFixed(1), drag.dy.toFixed(1), 1.5, -8);
+    });
+    const endDrag = e => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const d = drag; drag = null; busy = true;
+      const hx = d.hx + d.dx, hy = d.hy + d.dy;
+      const tg = e.type === 'pointercancel' ? null : findTarget(hx, hy);
+      if (!tg) {                                                          // dropped in the wrong place -> spring back
+        const out = !(op && (() => { const r = stage.getBoundingClientRect(); const px = Math.round((hx - r.left) / r.width * S), py = Math.round((hy - r.top) / r.height * S); return px >= 0 && py >= 0 && px < S && py < S && op[py * S + px]; })());
+        if (e.type !== 'pointercancel') flashHint(out ? 'Drop the hammer right on the pumpkin' : 'That piece is already broken \u2013 try another spot');
+        goHome();
+        return;
+      }
+      if (rm) { startCrack(tg.id, tg.px, tg.py); goHome(); return; }
+      ham.style.transition = 'transform .11s ease-in';                    // swing down
+      setT(d.dx, d.dy, 1.5, 20);
+      setTimeout(() => {
+        startCrack(tg.id, tg.px, tg.py);
+        ham.style.transition = 'transform .1s ease-out';
+        setT(d.dx, d.dy, 1.5, 6);
+      }, 110);
+      setTimeout(goHome, 430);
+    };
+    ham.addEventListener('pointerup', endDrag);
+    ham.addEventListener('pointercancel', endDrag);
 
     /* ---------- all broken -> next scene ---------- */
     function win() {
       won = true; ready = false;
+      hwrap.classList.add('away');
       setTimeout(() => {
         sec.classList.add('exit');
         setTimeout(() => { sec.classList.add('gone'); pfx.remove(); }, rm ? 0 : 1100);
@@ -578,7 +690,7 @@
       if (scratchEl) scratchEl.classList.add('out');
       if (coinEl) coinEl.classList.add('gone');
       build().then(() => {
-        if (!built) {                                    // build failed: do not leave the page stuck
+        if (!built) {
           console.warn('[pumpkin] skipping pumpkin, showing next scene');
           won = true; scene.classList.add('show'); pfx.remove();
           return;

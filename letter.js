@@ -158,8 +158,8 @@ const CW = 760, CH = 359;                                            // canvas p
 cv.width = CW; cv.height = CH;
 let scratchOn = false, scratchLive = false, cleared = false, lastPt = null, checkT = 0;
 
-/* the canvas can not read the CSS variable, so the page font (Drop Line) is spelled out here - keep it the same as --font in letter.css */
-const CANVAS_FONT = '"Drop Line", "Trebuchet MS", "Segoe UI", system-ui, sans-serif';
+/* the canvas can not read the CSS variable, so the page font (Runtime) is spelled out here - keep it the same as --font in letter.css */
+const CANVAS_FONT = '"Runtime", "Trebuchet MS", "Segoe UI", system-ui, sans-serif';
 
 function drawSilver() {
   ctx.globalCompositeOperation = 'source-over';
@@ -185,7 +185,7 @@ function drawSilver() {
 }
 drawSilver();
 if (document.fonts && document.fonts.load) {                         // draw again once the font has arrived
-  document.fonts.load('400 37px "Drop Line"').then(() => { if (!cleared && !lastPt) drawSilver(); }).catch(() => {});
+  document.fonts.load('400 37px "Runtime"').then(() => { if (!cleared && !lastPt) drawSilver(); }).catch(() => {});
 }
 
 function enterScratch() {

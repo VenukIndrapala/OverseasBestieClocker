@@ -7,7 +7,9 @@
    3. THREE BOXES under the pumpkin: tick all three to unlock the hammer (on the right)
    4. DRAG the hammer and DROP it on the pumpkin. Only the piece you drop it on breaks.
       Do this on five different pieces. A drop on empty space / a broken piece springs back.
-   5. when the 5th piece has fallen the stem slides off to the right and the next scene appears.
+   5. when the 5th piece has fallen the closed envelope (hidden inside the pumpkin all along) opens where it sits,
+      enlarges to the middle of the screen, hearts rise from its bottom edge and the letter slides out.
+      The stem slides off to the right at the same time. A 'pumpkin:done' event fires when the letter is out.
 
    If IMG_SHADOW / IMG_STEM / IMG_PIECES are empty the script draws its own pumpkin.
    Paste your own picture data into the three constants below to use your pictures.
@@ -23,11 +25,22 @@
     /* the love letter that hides inside the pumpkin (your letter animation, rebuilt here with "lt-" class names
        so it can not clash with anything else on the page - you do NOT need love letter.css / .js / .html any more) */
     const LETTER_HTML =
-      '<div class="lt" id="plt"><div class="lt-valentines">' +
-        '<div class="lt-envelope"></div><div class="lt-front"></div>' +
-        '<div class="lt-card"><div class="lt-text">To my<br>Crush<br>I love You!</div><div class="lt-heart"></div></div>' +
-        '<div class="lt-hearts"><div class="lt-h lt-h1"></div><div class="lt-h lt-h2"></div><div class="lt-h lt-h3"></div><div class="lt-h lt-h4"></div><div class="lt-h lt-h5"></div></div>' +
-      '</div><div class="lt-shadow"></div></div>';
+      '<div class="lt" id="plt"><div class="lt-valentines"><div class="lt-env">' +
+        '<div class="lt-back"></div>' +
+        '<div class="lt-paper"><div class="lt-text">To my<br>Crush<br>I love You!</div><div class="lt-heart"></div></div>' +
+        '<div class="lt-front"><svg viewBox="0 0 300 200" preserveAspectRatio="none" aria-hidden="true">' +
+          '<path d="M0 0 L150 112 L0 200 Z" fill="#f3dcae"/><path d="M300 0 L150 112 L300 200 Z" fill="#eed3a0"/><path d="M0 200 L150 112 L300 200 Z" fill="#f8e7c6"/>' +
+          '<path d="M0 0 L150 112 L300 0 M0 200 L150 112 L300 200" fill="none" stroke="rgba(150,100,40,.28)" stroke-width="1.2"/></svg></div>' +
+        '<div class="lt-flap">' +
+          '<div class="face"><svg viewBox="0 0 300 112" aria-hidden="true"><defs><linearGradient id="ltg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6dba9"/><stop offset="1" stop-color="#ecc98a"/></linearGradient></defs>' +
+            '<path d="M0 0 L300 0 L166 104 Q150 117 134 104 Z" fill="url(#ltg1)" stroke="rgba(150,100,40,.35)" stroke-width="1.2" stroke-linejoin="round"/>' +
+            '<circle cx="150" cy="86" r="16" fill="#c0392b"/><circle cx="150" cy="86" r="16" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"/>' +
+            '<path d="M150 96 L141 87 A4.8 4.8 0 0 1 150 81 A4.8 4.8 0 0 1 159 87 Z" fill="#ffd9d0"/></svg></div>' +
+          '<div class="face in"><svg viewBox="0 0 300 112" aria-hidden="true">' +
+            '<path d="M0 0 L300 0 L166 104 Q150 117 134 104 Z" fill="#e4c183" stroke="rgba(150,100,40,.35)" stroke-width="1.2" stroke-linejoin="round"/>' +
+            '<path d="M14 5 L286 5 L164 96 Q150 106 136 96 Z" fill="#ecd09c"/></svg></div>' +
+        '</div>' +
+      '</div><div class="lt-hearts"></div></div><div class="lt-shadow"></div></div>';
 
     /* ---------------------------------------------------------------
        PASTE YOUR PICTURE DATA HERE (data-URIs or file paths).
@@ -93,43 +106,45 @@
     .phwrap.away{opacity:0}
     @keyframes phwig{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}45%{transform:rotate(11deg)}70%{transform:rotate(-6deg)}}
 
-    /* ---- the letter (sits inside the pumpkin, closed; later flies out and enlarges) ---- */
+    /* ---- the letter (sits inside the pumpkin; its flap opens, it flies out + enlarges, hearts rise from the bottom) ---- */
     .lt{position:absolute;left:50%;top:60%;width:300px;height:200px;pointer-events:none;transform-origin:center center;transform:translate(-50%,-50%) scale(var(--ls,.5))}
     .lt.fly{position:fixed;left:50%;top:50%;transition:transform 1.2s cubic-bezier(.22,1,.36,1)}
-    .lt.live{pointer-events:auto;cursor:pointer}
     .ltlayer{position:fixed;inset:0;z-index:605;pointer-events:none}
-    .lt-valentines{position:relative}
-    .lt.show .lt-valentines{animation:lt-up 3s linear infinite}
-    @keyframes lt-up{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
-    .lt-envelope{position:relative;width:300px;height:200px;background:#f08080}
-    .lt-envelope:before{content:"";position:absolute;width:212px;height:212px;background:#f08080;transform:rotate(45deg);top:-105px;left:44px;border-radius:30px 0 0 0}
-    .lt-card{position:absolute;background:#eae2b7;width:270px;height:170px;top:10px;left:15px;box-shadow:-5px -5px 100px rgba(0,0,0,.4);transition:top .7s ease,box-shadow .8s}
-    .lt:not(.show) .lt-card{box-shadow:0 0 0 rgba(0,0,0,0)}
-    .lt.open .lt-card{top:-90px}
-    .lt-card:before{content:"";position:absolute;border:3px dotted #003049;width:240px;height:140px;left:12px;top:12px}
-    .lt-text{position:absolute;font-family:"Brush Script MT",cursive;font-size:28px;text-align:center;line-height:25px;top:20px;left:85px;color:#003049;white-space:nowrap}
-    .lt-heart{background:#d62828;display:inline-block;height:30px;margin:0 10px;position:relative;top:117px;left:110px;transform:rotate(-45deg);width:30px}
-    .lt-heart:before,.lt-heart:after{content:"";background:#d62828;border-radius:60%;height:30px;position:absolute;width:30px}
-    .lt-heart:before{top:-15px;left:0}
-    .lt-heart:after{left:15px;top:0}
-    .lt-hearts{position:absolute;opacity:0;transition:opacity .6s}
+    .lt-valentines{position:relative;width:300px;height:200px}
+    .lt.show .lt-valentines{animation:lt-up 3s ease-in-out infinite}
+    @keyframes lt-up{0%,100%{transform:translateY(0)}50%{transform:translateY(-22px)}}
+    .lt-env{position:relative;width:300px;height:200px;perspective:1400px}
+    .lt-back{position:absolute;inset:0;border-radius:2px;background:linear-gradient(160deg,#f6dba9,#efd09a);box-shadow:0 14px 28px rgba(91,42,38,.22),inset 0 0 26px -8px rgba(150,100,40,.35)}
+    .lt-paper{position:absolute;left:4.5%;right:4.5%;top:0;height:80%;z-index:0;background:linear-gradient(#f2e1c8,#f8ead6 16%,#f7e9d4);box-shadow:inset 0 8px 10px -6px rgba(140,95,40,.38);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:translate .9s cubic-bezier(.22,1,.36,1)}
+    .lt-paper:before{content:"";position:absolute;inset:9px;border:2px dotted rgba(0,48,73,.4);pointer-events:none}
+    .lt.out .lt-paper{z-index:1;translate:0 -58%}
+    .lt-text{font:400 30px/1.05 "Brush Script MT","Lobster Two",cursive;color:#5B2A26;text-align:center;white-space:nowrap}
+    .lt-heart{position:relative;width:20px;height:20px;background:#d62828;transform:rotate(-45deg);margin-top:4px}
+    .lt-heart:before,.lt-heart:after{content:"";position:absolute;width:20px;height:20px;border-radius:60%;background:#d62828}
+    .lt-heart:before{top:-10px;left:0}
+    .lt-heart:after{left:10px;top:0}
+    .lt-front{position:absolute;inset:0;z-index:2;border-radius:2px;overflow:hidden;pointer-events:none}
+    .lt-front svg{display:block;width:100%;height:100%}
+    .lt-flap{position:absolute;left:0;top:0;width:100%;height:56%;z-index:3;transform-origin:50% 0;transform-style:preserve-3d;pointer-events:none;will-change:transform}
+    .lt-flap .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+    .lt-flap .face svg{display:block;width:100%;height:100%;overflow:visible}
+    .lt-flap .in{transform:rotateY(180deg)}
+    .lt.openenv .lt-flap{animation:lt-flapSwing .9s cubic-bezier(.6,0,.4,1) both,lt-flapLayer .9s linear both}
+    @keyframes lt-flapSwing{from{transform:rotateX(0deg)}to{transform:rotateX(-180deg)}}
+    @keyframes lt-flapLayer{0%,49.9%{z-index:3}50%,100%{z-index:0}}
+    /* hearts: they start at the bottom edge of the envelope and rise */
+    .lt-hearts{position:absolute;left:0;top:0;width:300px;height:200px;z-index:6;pointer-events:none;opacity:0;transition:opacity .4s}
     .lt.show .lt-hearts{opacity:1}
-    .lt-h{background:red;display:inline-block;height:10px;margin:0 10px;position:relative;transform:rotate(-45deg);width:10px;top:50px;animation-play-state:paused}
+    .lt-h{position:absolute;top:194px;width:var(--hs,12px);height:var(--hs,12px);background:var(--hc,#e63946);transform:rotate(-45deg);opacity:0;animation:lt-heart var(--hd,2.4s) ease-out var(--hl,0s) infinite;animation-play-state:paused}
     .lt.show .lt-h{animation-play-state:running}
-    .lt-h:before,.lt-h:after{content:"";background:red;border-radius:50%;height:10px;position:absolute;width:10px}
-    .lt-h:before{top:-5px;left:0}
-    .lt-h:after{left:5px;top:0}
-    .lt-h1{left:10px;animation:lt-heart 1s ease-out infinite}
-    .lt-h2{left:30px;animation:lt-heart 2s ease-out infinite}
-    .lt-h3{left:50px;animation:lt-heart 1.5s ease-out infinite}
-    .lt-h4{left:70px;animation:lt-heart 2.3s ease-out infinite}
-    .lt-h5{left:90px;animation:lt-heart 1.7s ease-out infinite}
-    @keyframes lt-heart{0%{transform:translateY(0) rotate(-45deg) scale(.3);opacity:1}100%{transform:translateY(-150px) rotate(-45deg) scale(1.3);opacity:.5}}
-    .lt-front{position:absolute;border-right:180px solid #f4978e;border-top:95px solid transparent;border-bottom:100px solid transparent;left:120px;top:5px;width:0;height:0;z-index:10}
-    .lt-front:before{position:absolute;content:"";border-left:300px solid #f8ad9d;border-top:195px solid transparent;left:-120px;top:-95px;width:0;height:0}
-    .lt-shadow{position:absolute;width:330px;height:25px;border-radius:50%;background:rgba(0,0,0,.3);top:225px;left:-15px;opacity:0;transition:opacity .8s;animation:lt-scale 3s linear infinite;z-index:-1}
+    .lt-h:before,.lt-h:after{content:"";position:absolute;width:100%;height:100%;border-radius:50%;background:inherit}
+    .lt-h:before{top:-50%;left:0}
+    .lt-h:after{left:50%;top:0}
+    @keyframes lt-heart{0%{transform:translate(0,0) rotate(-45deg) scale(.4);opacity:0}12%{opacity:1}100%{transform:translate(var(--hx,0),-270px) rotate(-45deg) scale(1.5);opacity:0}}
+    .lt-shadow{position:absolute;width:330px;height:25px;border-radius:50%;background:rgba(0,0,0,.3);top:225px;left:-15px;opacity:0;transition:opacity .8s;animation:lt-scale 3s ease-in-out infinite;z-index:-1}
     .lt.show .lt-shadow{opacity:1}
     @keyframes lt-scale{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.85)}}
+    @media(prefers-reduced-motion:reduce){.lt.openenv .lt-flap{animation:none;transform:rotateX(-180deg);z-index:0}.lt-paper{transition:none}}
 
     .pumpkin.exit{pointer-events:none}
     .pumpkin.exit .pslide{translate:125vw 0;transition:translate .95s cubic-bezier(.65,0,.35,1)}
@@ -138,7 +153,7 @@
     .pscene.show{visibility:visible}
     .pscene h1{margin:0;font:700 clamp(34px,8vw,80px)/1.1 var(--font,system-ui,sans-serif);color:var(--ink,#3a2a1a);opacity:0;translate:0 26px;transition:opacity .7s .55s,translate .9s cubic-bezier(.22,1,.36,1) .55s}
     .pscene.show h1{opacity:1;translate:0 0}
-    @media(prefers-reduced-motion:reduce){.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1,.phwrap,.phammer,.lt,.lt-card,.lt-hearts,.lt-shadow{transition:none;animation:none}.lt-valentines,.lt-h{animation:none!important}}
+    @media(prefers-reduced-motion:reduce){.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1,.phwrap,.phammer,.lt,.lt-paper,.lt-hearts,.lt-shadow{transition:none;animation:none}.lt-valentines,.lt-h{animation:none!important}}
     `;
     document.head.appendChild(st);
 
@@ -183,7 +198,7 @@
     function sizePfx() { const d = Math.min(2, window.devicePixelRatio || 1); pfx.width = innerWidth * d; pfx.height = innerHeight * d; pctx.setTransform(d, 0, 0, d, 0, 0); }
     sizePfx(); addEventListener('resize', sizePfx);
 
-    /* ---------- the letter: closed inside the pumpkin, then flies out and enlarges ---------- */
+    /* ---------- the letter: closed envelope inside the pumpkin -> flap opens -> flies out + enlarges -> hearts rise ---------- */
     let flown = false, live = false, layer = null;
     const setLs = () => { if (!flown) lt.style.setProperty('--ls', (stage.clientWidth * .34 / 300).toFixed(4)); };   // size of the letter inside the pumpkin
     const finalScale = () => clamp(Math.min(innerWidth * .8 / 300, innerHeight * .58 / 330), .5, 1.8);
@@ -191,29 +206,45 @@
     const placeFinal = () => { const s = finalScale(); setLT(0, (20 * s).toFixed(1), s.toFixed(3)); };
     setLs(); addEventListener('resize', () => { if (!flown) setLs(); else if (live) { lt.style.transition = 'none'; placeFinal(); } });
 
-    function flyLetter(animate) {
+    /* the hearts (made once, they wait invisible until the letter is enlarged) */
+    (() => {
+      const box = lt.querySelector('.lt-hearts'), cols = ['#e63946', '#ff5d73', '#d62828', '#ff8fa3', '#c1121f'];
+      for (let i = 0; i < 18; i++) {
+        const h = document.createElement('i'); h.className = 'lt-h';
+        h.style.left = rnd(10, 280).toFixed(0) + 'px';
+        h.style.setProperty('--hs', rnd(10, 18).toFixed(0) + 'px');
+        h.style.setProperty('--hc', cols[(Math.random() * cols.length) | 0]);
+        h.style.setProperty('--hd', rnd(2.2, 3.8).toFixed(2) + 's');
+        h.style.setProperty('--hl', (-rnd(0, 3.6)).toFixed(2) + 's');
+        h.style.setProperty('--hx', rnd(-26, 26).toFixed(0) + 'px');
+        box.appendChild(h);
+      }
+    })();
+
+    /* step 1: take the letter out of the pumpkin WITHOUT moving it (so it stays when the pumpkin slides away) */
+    function liftLetter() {
       if (flown) return; flown = true;
-      let cx = innerWidth / 2, cy = innerHeight / 2, s0 = finalScale();
-      if (animate) { const r = lt.getBoundingClientRect(); if (r.width > 0) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; s0 = r.width / 300; } else animate = false; }
-      layer = document.createElement('div'); layer.className = 'ltlayer';
-      document.body.appendChild(layer);
+      const r = lt.getBoundingClientRect(), has = r.width > 0;
+      const cx = has ? r.left + r.width / 2 : innerWidth / 2, cy = has ? r.top + r.height / 2 : innerHeight / 2, s0 = has ? r.width / 300 : finalScale();
+      layer = document.createElement('div'); layer.className = 'ltlayer'; document.body.appendChild(layer);
       lt.style.transition = 'none';
-      lt.classList.add('fly'); layer.appendChild(lt);                    // out of the pumpkin, so it stays when the pumpkin slides away
-      if (animate && !rm) {
-        setLT((cx - innerWidth / 2).toFixed(1), (cy - innerHeight / 2).toFixed(1), s0.toFixed(3));   // exactly where it was inside the pumpkin
-        void lt.offsetWidth;
-        lt.style.transition = '';                                         // back to the css transition
-        placeFinal();                                                     // ...and enlarge to the middle of the screen
-      } else placeFinal();
-      const settle = () => {
-        live = true; lt.classList.add('live', 'show');                    // hearts float, letter bobs
-        setTimeout(() => { lt.classList.add('open'); document.dispatchEvent(new CustomEvent('pumpkin:done')); }, rm ? 0 : 450);   // the card rises out
-      };
-      setTimeout(settle, animate && !rm ? 1250 : 0);
+      lt.classList.add('fly'); layer.appendChild(lt);
+      setLT((cx - innerWidth / 2).toFixed(1), (cy - innerHeight / 2).toFixed(1), s0.toFixed(3));
+      void lt.offsetWidth; lt.style.transition = '';
     }
-    lt.addEventListener('pointerenter', e => { if (live && e.pointerType === 'mouse') lt.classList.add('open'); });
-    lt.addEventListener('pointerleave', e => { if (live && e.pointerType === 'mouse') lt.classList.remove('open'); });
-    lt.addEventListener('pointerdown', e => { if (live && e.pointerType !== 'mouse') lt.classList.toggle('open'); });
+    /* step 3: enlarge to the middle of the screen, then the hearts rise from the bottom of the envelope and the letter comes out */
+    function enlargeLetter() {
+      placeFinal();
+      setTimeout(() => {
+        live = true; lt.classList.add('show');
+        setTimeout(() => { lt.classList.add('out'); document.dispatchEvent(new CustomEvent('pumpkin:done')); }, rm ? 0 : 500);
+      }, rm ? 0 : 1250);
+    }
+    function showLetterNow() {                                         // used if the pumpkin could not be built
+      liftLetter(); lt.classList.add('openenv');
+      lt.style.transition = 'none'; placeFinal(); live = true; lt.classList.add('show');
+      setTimeout(() => lt.classList.add('out'), rm ? 0 : 900);
+    }
 
     /* ---------- state ---------- */
     let built = false, buildP = null, starting = false, started = false, ready = false, won = false;
@@ -762,7 +793,8 @@
     function win() {
       won = true; ready = false;
       hwrap.classList.add('away');
-      setTimeout(() => flyLetter(true), rm ? 0 : 900);                   // the letter enlarges once the last shards have fallen
+      setTimeout(() => { liftLetter(); lt.classList.add('openenv'); }, rm ? 0 : 900);   // the envelope opens, right where it sits in the pumpkin
+      setTimeout(enlargeLetter, rm ? 0 : 1900);                            // then it enlarges and the hearts rise from its bottom
       setTimeout(() => {
         sec.classList.add('exit');                                        // the stem slides away to the right
         setTimeout(() => { sec.classList.add('gone'); pfx.remove(); }, rm ? 0 : 1100);
@@ -778,7 +810,7 @@
       build().then(() => {
         if (!built) {
           console.warn('[pumpkin] skipping pumpkin, showing next scene');
-          won = true; flyLetter(false); pfx.remove();
+          won = true; showLetterNow(); pfx.remove();
           return;
         }
         sec.classList.add('show');

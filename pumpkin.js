@@ -8,7 +8,7 @@
    4. DRAG the hammer and DROP it on the pumpkin. Only the piece you drop it on breaks.
       Do this on five different pieces. A drop on empty space / a broken piece springs back.
    5. when the 5th piece has fallen the closed envelope (hidden inside the pumpkin all along) opens where it sits,
-      enlarges to the middle of the screen, hearts rise from its bottom edge and the letter slides out.
+      enlarges to the middle of the screen, hearts float up from inside the exposed letter as it slides out.
       The stem slides off to the right at the same time. A 'pumpkin:done' event fires when the letter is out.
 
    If IMG_SHADOW / IMG_STEM / IMG_PIECES are empty the script draws its own pumpkin.
@@ -132,10 +132,10 @@
     .lt.openenv .lt-flap{animation:lt-flapSwing .9s cubic-bezier(.6,0,.4,1) both,lt-flapLayer .9s linear both}
     @keyframes lt-flapSwing{from{transform:rotateX(0deg)}to{transform:rotateX(-180deg)}}
     @keyframes lt-flapLayer{0%,49.9%{z-index:3}50%,100%{z-index:0}}
-    /* five hearts rise from fixed positions along the envelope's bottom edge */
+    /* five hearts rise from fixed positions inside the exposed letter */
     .lt-hearts{position:absolute;left:0;top:0;width:300px;height:200px;z-index:6;pointer-events:none;opacity:0;transition:opacity .4s}
     .lt.show .lt-hearts{opacity:1}
-    .lt-h{position:absolute;top:194px;width:16px;height:16px;background:var(--hc,#e63946);transform:rotate(-45deg);opacity:0;animation:lt-heart var(--hd,1.5s) ease-in-out var(--hl,0s) infinite;animation-play-state:paused}
+    .lt-h{position:absolute;top:var(--hy,52px);width:16px;height:16px;background:var(--hc,#e63946);transform:rotate(-45deg);opacity:0;animation:lt-heart var(--hd,1.5s) ease-in-out var(--hl,0s) infinite;animation-play-state:paused}
     .lt.show .lt-h{animation-play-state:running}
     .lt-h:before,.lt-h:after{content:"";position:absolute;width:100%;height:100%;border-radius:50%;background:inherit}
     .lt-h:before{top:-50%;left:0}
@@ -206,20 +206,21 @@
     const placeFinal = () => { const s = finalScale(); setLT(0, (20 * s).toFixed(1), s.toFixed(3)); };
     setLs(); addEventListener('resize', () => { if (!flown) setLs(); else if (live) { lt.style.transition = 'none'; placeFinal(); } });
 
-    /* five hearts, fixed along the envelope and staggered like the reference animation */
+    /* five hearts begin inside the visible letter area and float upward with staggered timing */
     (() => {
       const box = lt.querySelector('.lt-hearts');
       const hearts = [
-        { left: 35, duration: 1.0, delay: 0.0, color: '#e63946' },
-        { left: 85, duration: 2.0, delay: 0.2, color: '#ff5d73' },
-        { left: 135, duration: 1.5, delay: 0.4, color: '#d62828' },
-        { left: 185, duration: 2.3, delay: 0.1, color: '#ff8fa3' },
-        { left: 235, duration: 1.7, delay: 0.3, color: '#c1121f' }
+        { left: 35, top: 52, duration: 1.0, delay: 0.0, color: '#e63946' },
+        { left: 85, top: 68, duration: 2.0, delay: 0.2, color: '#ff5d73' },
+        { left: 135, top: 43, duration: 1.5, delay: 0.4, color: '#d62828' },
+        { left: 185, top: 61, duration: 2.3, delay: 0.1, color: '#ff8fa3' },
+        { left: 235, top: 48, duration: 1.7, delay: 0.3, color: '#c1121f' }
       ];
       hearts.forEach(spec => {
         const h = document.createElement('i');
         h.className = 'lt-h';
         h.style.left = spec.left + 'px';
+        h.style.setProperty('--hy', spec.top + 'px');
         h.style.setProperty('--hd', spec.duration + 's');
         h.style.setProperty('--hl', spec.delay + 's');
         h.style.setProperty('--hc', spec.color);

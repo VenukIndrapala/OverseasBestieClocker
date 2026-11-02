@@ -20,6 +20,15 @@
     const HX = .65, HY = .39;               // where the centre of the hammer HEAD is inside the hammer picture (the drop point)
     const HAMMER_SRC = 'mallet.png';        // <- your transparent mallet picture, saved in the SAME folder as your index.html on GitHub
 
+    /* the love letter that hides inside the pumpkin (your letter animation, rebuilt here with "lt-" class names
+       so it can not clash with anything else on the page - you do NOT need love letter.css / .js / .html any more) */
+    const LETTER_HTML =
+      '<div class="lt" id="plt"><div class="lt-valentines">' +
+        '<div class="lt-envelope"></div><div class="lt-front"></div>' +
+        '<div class="lt-card"><div class="lt-text">To my<br>Crush<br>I love You!</div><div class="lt-heart"></div></div>' +
+        '<div class="lt-hearts"><div class="lt-h lt-h1"></div><div class="lt-h lt-h2"></div><div class="lt-h lt-h3"></div><div class="lt-h lt-h4"></div><div class="lt-h lt-h5"></div></div>' +
+      '</div><div class="lt-shadow"></div></div>';
+
     /* ---------------------------------------------------------------
        PASTE YOUR PICTURE DATA HERE (data-URIs or file paths).
        --------------------------------------------------------------- */
@@ -84,6 +93,44 @@
     .phwrap.away{opacity:0}
     @keyframes phwig{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg)}45%{transform:rotate(11deg)}70%{transform:rotate(-6deg)}}
 
+    /* ---- the letter (sits inside the pumpkin, closed; later flies out and enlarges) ---- */
+    .lt{position:absolute;left:50%;top:60%;width:300px;height:200px;pointer-events:none;transform-origin:center center;transform:translate(-50%,-50%) scale(var(--ls,.5))}
+    .lt.fly{position:fixed;left:50%;top:50%;transition:transform 1.2s cubic-bezier(.22,1,.36,1)}
+    .lt.live{pointer-events:auto;cursor:pointer}
+    .ltlayer{position:fixed;inset:0;z-index:605;pointer-events:none}
+    .lt-valentines{position:relative}
+    .lt.show .lt-valentines{animation:lt-up 3s linear infinite}
+    @keyframes lt-up{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+    .lt-envelope{position:relative;width:300px;height:200px;background:#f08080}
+    .lt-envelope:before{content:"";position:absolute;width:212px;height:212px;background:#f08080;transform:rotate(45deg);top:-105px;left:44px;border-radius:30px 0 0 0}
+    .lt-card{position:absolute;background:#eae2b7;width:270px;height:170px;top:10px;left:15px;box-shadow:-5px -5px 100px rgba(0,0,0,.4);transition:top .7s ease,box-shadow .8s}
+    .lt:not(.show) .lt-card{box-shadow:0 0 0 rgba(0,0,0,0)}
+    .lt.open .lt-card{top:-90px}
+    .lt-card:before{content:"";position:absolute;border:3px dotted #003049;width:240px;height:140px;left:12px;top:12px}
+    .lt-text{position:absolute;font-family:"Brush Script MT",cursive;font-size:28px;text-align:center;line-height:25px;top:20px;left:85px;color:#003049;white-space:nowrap}
+    .lt-heart{background:#d62828;display:inline-block;height:30px;margin:0 10px;position:relative;top:117px;left:110px;transform:rotate(-45deg);width:30px}
+    .lt-heart:before,.lt-heart:after{content:"";background:#d62828;border-radius:60%;height:30px;position:absolute;width:30px}
+    .lt-heart:before{top:-15px;left:0}
+    .lt-heart:after{left:15px;top:0}
+    .lt-hearts{position:absolute;opacity:0;transition:opacity .6s}
+    .lt.show .lt-hearts{opacity:1}
+    .lt-h{background:red;display:inline-block;height:10px;margin:0 10px;position:relative;transform:rotate(-45deg);width:10px;top:50px;animation-play-state:paused}
+    .lt.show .lt-h{animation-play-state:running}
+    .lt-h:before,.lt-h:after{content:"";background:red;border-radius:50%;height:10px;position:absolute;width:10px}
+    .lt-h:before{top:-5px;left:0}
+    .lt-h:after{left:5px;top:0}
+    .lt-h1{left:10px;animation:lt-heart 1s ease-out infinite}
+    .lt-h2{left:30px;animation:lt-heart 2s ease-out infinite}
+    .lt-h3{left:50px;animation:lt-heart 1.5s ease-out infinite}
+    .lt-h4{left:70px;animation:lt-heart 2.3s ease-out infinite}
+    .lt-h5{left:90px;animation:lt-heart 1.7s ease-out infinite}
+    @keyframes lt-heart{0%{transform:translateY(0) rotate(-45deg) scale(.3);opacity:1}100%{transform:translateY(-150px) rotate(-45deg) scale(1.3);opacity:.5}}
+    .lt-front{position:absolute;border-right:180px solid #f4978e;border-top:95px solid transparent;border-bottom:100px solid transparent;left:120px;top:5px;width:0;height:0;z-index:10}
+    .lt-front:before{position:absolute;content:"";border-left:300px solid #f8ad9d;border-top:195px solid transparent;left:-120px;top:-95px;width:0;height:0}
+    .lt-shadow{position:absolute;width:330px;height:25px;border-radius:50%;background:rgba(0,0,0,.3);top:225px;left:-15px;opacity:0;transition:opacity .8s;animation:lt-scale 3s linear infinite;z-index:-1}
+    .lt.show .lt-shadow{opacity:1}
+    @keyframes lt-scale{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.85)}}
+
     .pumpkin.exit{pointer-events:none}
     .pumpkin.exit .pslide{translate:125vw 0;transition:translate .95s cubic-bezier(.65,0,.35,1)}
     .pumpkin.gone{display:none}
@@ -91,7 +138,7 @@
     .pscene.show{visibility:visible}
     .pscene h1{margin:0;font:700 clamp(34px,8vw,80px)/1.1 var(--font,system-ui,sans-serif);color:var(--ink,#3a2a1a);opacity:0;translate:0 26px;transition:opacity .7s .55s,translate .9s cubic-bezier(.22,1,.36,1) .55s}
     .pscene.show h1{opacity:1;translate:0 0}
-    @media(prefers-reduced-motion:reduce){.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1,.phwrap,.phammer{transition:none;animation:none}}
+    @media(prefers-reduced-motion:reduce){.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1,.phwrap,.phammer,.lt,.lt-card,.lt-hearts,.lt-shadow{transition:none;animation:none}.lt-valentines,.lt-h{animation:none!important}}
     `;
     document.head.appendChild(st);
 
@@ -100,7 +147,7 @@
     sec.className = 'pumpkin'; sec.setAttribute('aria-label', 'Pumpkin. Tick the three boxes, then drag the hammer onto the pumpkin.');
     sec.innerHTML =
       '<div class="pslide">' +
-        '<div class="pstage" id="pstage"><div class="pshadow" id="pshadow"></div><div class="pstem" id="pstem"></div></div>' +
+        '<div class="pstage" id="pstage"><div class="pshadow" id="pshadow"></div>' + LETTER_HTML + '<div class="pstem" id="pstem"></div></div>' +
         '<div class="pboxes" id="pboxes">' +
           '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 1"></button>' +
           '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 2"></button>' +
@@ -118,7 +165,8 @@
     const stage = sec.querySelector('#pstage'), shadowEl = sec.querySelector('#pshadow'),
           stemEl = sec.querySelector('#pstem'), hint = sec.querySelector('#phint'),
           boxes = Array.from(sec.querySelectorAll('.pbox')),
-          hwrap = sec.querySelector('#phwrap'), ham = sec.querySelector('#phammer');
+          hwrap = sec.querySelector('#phwrap'), ham = sec.querySelector('#phammer'),
+          lt = sec.querySelector('#plt');
     /* mallet picture: match the box to the picture's shape; if the file is missing, fall back to the drawn mallet */
     const himg = sec.querySelector('#phimg');
     himg.addEventListener('load', () => { if (himg.naturalWidth && himg.naturalHeight) hwrap.style.aspectRatio = himg.naturalWidth + '/' + himg.naturalHeight; });
@@ -134,6 +182,38 @@
     const pctx = pfx.getContext('2d');
     function sizePfx() { const d = Math.min(2, window.devicePixelRatio || 1); pfx.width = innerWidth * d; pfx.height = innerHeight * d; pctx.setTransform(d, 0, 0, d, 0, 0); }
     sizePfx(); addEventListener('resize', sizePfx);
+
+    /* ---------- the letter: closed inside the pumpkin, then flies out and enlarges ---------- */
+    let flown = false, live = false, layer = null;
+    const setLs = () => { if (!flown) lt.style.setProperty('--ls', (stage.clientWidth * .34 / 300).toFixed(4)); };   // size of the letter inside the pumpkin
+    const finalScale = () => clamp(Math.min(innerWidth * .8 / 300, innerHeight * .58 / 330), .5, 1.8);
+    const setLT = (dx, dy, s) => { lt.style.transform = 'translate(' + dx + 'px,' + dy + 'px) translate(-50%,-50%) scale(' + s + ')'; };
+    const placeFinal = () => { const s = finalScale(); setLT(0, (20 * s).toFixed(1), s.toFixed(3)); };
+    setLs(); addEventListener('resize', () => { if (!flown) setLs(); else if (live) { lt.style.transition = 'none'; placeFinal(); } });
+
+    function flyLetter(animate) {
+      if (flown) return; flown = true;
+      let cx = innerWidth / 2, cy = innerHeight / 2, s0 = finalScale();
+      if (animate) { const r = lt.getBoundingClientRect(); if (r.width > 0) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; s0 = r.width / 300; } else animate = false; }
+      layer = document.createElement('div'); layer.className = 'ltlayer';
+      document.body.appendChild(layer);
+      lt.style.transition = 'none';
+      lt.classList.add('fly'); layer.appendChild(lt);                    // out of the pumpkin, so it stays when the pumpkin slides away
+      if (animate && !rm) {
+        setLT((cx - innerWidth / 2).toFixed(1), (cy - innerHeight / 2).toFixed(1), s0.toFixed(3));   // exactly where it was inside the pumpkin
+        void lt.offsetWidth;
+        lt.style.transition = '';                                         // back to the css transition
+        placeFinal();                                                     // ...and enlarge to the middle of the screen
+      } else placeFinal();
+      const settle = () => {
+        live = true; lt.classList.add('live', 'show');                    // hearts float, letter bobs
+        setTimeout(() => { lt.classList.add('open'); document.dispatchEvent(new CustomEvent('pumpkin:done')); }, rm ? 0 : 450);   // the card rises out
+      };
+      setTimeout(settle, animate && !rm ? 1250 : 0);
+    }
+    lt.addEventListener('pointerenter', e => { if (live && e.pointerType === 'mouse') lt.classList.add('open'); });
+    lt.addEventListener('pointerleave', e => { if (live && e.pointerType === 'mouse') lt.classList.remove('open'); });
+    lt.addEventListener('pointerdown', e => { if (live && e.pointerType !== 'mouse') lt.classList.toggle('open'); });
 
     /* ---------- state ---------- */
     let built = false, buildP = null, starting = false, started = false, ready = false, won = false;
@@ -682,10 +762,10 @@
     function win() {
       won = true; ready = false;
       hwrap.classList.add('away');
+      setTimeout(() => flyLetter(true), rm ? 0 : 900);                   // the letter enlarges once the last shards have fallen
       setTimeout(() => {
-        sec.classList.add('exit');
+        sec.classList.add('exit');                                        // the stem slides away to the right
         setTimeout(() => { sec.classList.add('gone'); pfx.remove(); }, rm ? 0 : 1100);
-        setTimeout(() => { scene.classList.add('show'); }, rm ? 0 : 500);
       }, rm ? 0 : 1700);
     }
 
@@ -698,7 +778,7 @@
       build().then(() => {
         if (!built) {
           console.warn('[pumpkin] skipping pumpkin, showing next scene');
-          won = true; scene.classList.add('show'); pfx.remove();
+          won = true; flyLetter(false); pfx.remove();
           return;
         }
         sec.classList.add('show');

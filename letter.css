@@ -8,13 +8,18 @@
   font-weight:100 900;font-style:normal;font-display:swap;
 }
 :root{
-  --ink:#5B2A26;            /* text colour: deep rose-brown that sits well on Soft Pink */
-  --ink2:#7A4A42;           /* softer text for small labels */
-  --accent:#C9563F;         /* seal / focus colour */
-  --softpink:#FAB6A2;       /* Clairtone 8083-8 Soft Pink */
-  --softpink2:#FCCDBF;      /* lighter tint of it */
-  --softpink3:#FEE6DE;      /* light tint for small cards inside the pink panels */
-  --pinkgrad:linear-gradient(135deg,var(--softpink),var(--softpink2));
+  /* ---- the palette ---- */
+  --teal:#1FBFAD;           /* strong teal */
+  --mint:#7DE2D1;           /* light teal */
+  --ice:#DFF7F2;            /* very light mint  -> MAIN BACKGROUND of every scene */
+  --cream:#F2E8D5;          /* warm cream (small cards) */
+  --deep:#0B3B3A;           /* dark teal (text, buttons) */
+
+  --bg:var(--ice);          /* page background, used by all scenes */
+  --ink:var(--deep);        /* text colour */
+  --ink2:rgba(11,59,58,.72);/* softer text for small labels / hints */
+  --accent:var(--teal);     /* focus colour */
+  --panelgrad:linear-gradient(135deg,var(--mint),var(--teal));
   --font:'Drop Line','Trebuchet MS','Segoe UI',system-ui,-apple-system,sans-serif;
   --r:22px;                 /* one corner radius for every card */
   --ex:min(400px,84vw);     /* envelope width (height is 2/3 of it) */
@@ -25,8 +30,8 @@
   --coin-t:1.15s;           /* how long the coin takes to glide up */
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%}
-body{background:#fff;color:var(--ink);font:15px/1.4 var(--font);overflow-x:hidden;min-height:100vh;min-height:100dvh}
+html,body{margin:0;min-height:100%;background:var(--bg)}
+body{background:var(--bg);color:var(--ink);font:15px/1.4 var(--font);overflow-x:hidden;min-height:100vh;min-height:100dvh}
 button,input{font-family:var(--font)}
 button{font:inherit;color:inherit;cursor:pointer}
 [hidden]{display:none!important}
@@ -47,29 +52,29 @@ ul{list-style:none;margin:0;padding:0}
 .qc::before,.fx::before{content:"";position:absolute;left:0;right:0;top:100%;height:8px}
 .qc{position:relative}
 
-/* ---------- question cards (the Today's Log look) ---------- */
-.qpanel{padding:22px 18px 18px;border-radius:var(--r);background:var(--pinkgrad);box-shadow:0 22px 50px rgba(91,42,38,.1)}
+/* ---------- question cards ---------- */
+.qpanel{padding:22px 18px 18px;border-radius:var(--r);background:var(--panelgrad);box-shadow:0 22px 50px rgba(11,59,58,.16)}
 #qlist{display:flex;flex-direction:column;gap:14px}
-.qc{padding:16px 16px 16px;border-radius:14px;background:var(--softpink3);box-shadow:0 6px 16px rgba(91,42,38,.1)}
+.qc{padding:16px 16px 16px;border-radius:14px;background:var(--cream);box-shadow:0 6px 16px rgba(11,59,58,.14)}
 .qtop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .qh{display:flex;align-items:baseline;gap:10px;font:700 17px/1.25 var(--font);color:var(--ink);margin:0;cursor:pointer}
 .qh b{font:inherit}
-.qn{flex:none;font:700 17px/1.25 var(--font);color:var(--accent)}
+.qn{flex:none;font:700 17px/1.25 var(--font);color:var(--deep)}
 .fx{display:block;position:relative;margin-top:0}
 .qrow{display:flex;gap:8px;margin-top:12px}
 .qrow .fx{flex:1;min-width:0}
-.ans{display:block;width:100%;min-width:0;margin:0;padding:10px 12px;border:1px solid rgba(91,42,38,.22);border-radius:10px;background:#fffaf8;color:var(--ink);font:400 15px var(--font)}
-.ans::placeholder{color:#94675d}
+.ans{display:block;width:100%;min-width:0;margin:0;padding:10px 12px;border:1px solid rgba(11,59,58,.25);border-radius:10px;background:var(--ice);color:var(--ink);font:400 15px var(--font)}
+.ans::placeholder{color:rgba(11,59,58,.55)}
 .ans:focus-visible,.qbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.qbtn{flex:none;border:0;border-radius:10px;padding:0 18px;background:var(--ink);color:#fff;font:700 15px var(--font);transition:background .2s,transform .2s}
-.qbtn:hover{background:#3d1a17;transform:translateY(-2px)}
+.qbtn{flex:none;border:0;border-radius:10px;padding:0 18px;background:var(--deep);color:var(--ice);font:700 15px var(--font);transition:background .2s,transform .2s}
+.qbtn:hover{background:#072a29;transform:translateY(-2px)}
 
 /* correct: the card locks and a tick pops in */
-.ok{flex:none;width:28px;height:28px;border-radius:9px;background:var(--ink);display:grid;place-items:center;scale:0;opacity:0;transition:scale .35s cubic-bezier(.34,1.56,.64,1),opacity .2s}
-.ok svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.ok{flex:none;width:28px;height:28px;border-radius:9px;background:var(--deep);display:grid;place-items:center;scale:0;opacity:0;transition:scale .35s cubic-bezier(.34,1.56,.64,1),opacity .2s}
+.ok svg{width:18px;height:18px;fill:none;stroke:var(--ice);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .qc.done .ok{scale:1;opacity:1}
 .qc.done .qbtn{display:none}
-.qc.done .ans{background:rgba(255,255,255,.55);border-color:rgba(91,42,38,.12);font-weight:700;cursor:default}
+.qc.done .ans{background:rgba(223,247,242,.6);border-color:rgba(11,59,58,.14);font-weight:700;cursor:default}
 
 /* wrong: the card shakes */
 @keyframes shake{0%,100%{translate:0}20%{translate:-8px}40%{translate:7px}60%{translate:-5px}80%{translate:3px}}
@@ -136,8 +141,8 @@ ul{list-style:none;margin:0;padding:0}
 
 /* ---------- progress dots + hint ---------- */
 .progress{display:flex;gap:10px;margin-top:26px;order:6}
-.progress i{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:transparent;transition:background .3s,scale .35s cubic-bezier(.34,1.56,.64,1)}
-.progress i.on{background:var(--ink);scale:1.25}
+.progress i{width:12px;height:12px;border-radius:50%;border:2px solid var(--deep);background:transparent;transition:background .3s,scale .35s cubic-bezier(.34,1.56,.64,1)}
+.progress i.on{background:var(--deep);scale:1.25}
 .hint{order:7;margin:14px 0 0;min-height:1.4em;font:500 15px var(--font);color:var(--ink2);opacity:0;transform:translateY(6px);transition:opacity .5s,transform .5s}
 .hint.show{opacity:1;transform:none}
 
@@ -174,7 +179,7 @@ html:has(body.scratch-mode),body.scratch-mode{overflow:hidden}
 .scratch.cleared .shint{opacity:0;transition-delay:0s}
 
 /* ---------- toast ---------- */
-#toast{position:fixed;left:50%;bottom:30px;translate:-50% 20px;opacity:0;padding:12px 22px;border-radius:999px;background:#2d2d3a;color:#fff;font:500 14px var(--font);transition:.35s;z-index:2000;pointer-events:none}
+#toast{position:fixed;left:50%;bottom:30px;translate:-50% 20px;opacity:0;padding:12px 22px;border-radius:999px;background:var(--deep);color:var(--ice);font:500 14px var(--font);transition:.35s;z-index:2000;pointer-events:none}
 #toast.on{translate:-50% 0;opacity:1}
 
 /* ---------- smaller screens ---------- */

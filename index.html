@@ -13,6 +13,7 @@
      Everything else on the page uses the Runtime font from letter.css -->
 <link href="https://fonts.googleapis.com/css2?family=Lobster+Two:ital,wght@0,400;1,400;1,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="letter.css">
+<link rel="stylesheet" href="puzzle.css">
 </head>
 <body>
 
@@ -143,10 +144,18 @@
   </div>
 </div>
 
+<!-- the Final Puzzle scene (opened by the "Final Puzzle" button at the bottom of the letter) -->
+<div id="puz" class="puz" hidden role="dialog" aria-modal="true" aria-label="Final puzzle">
+  <div class="puz-top"><b>Final Puzzle</b><span id="puzInfo"></span><button type="button" class="puz-x" id="puzClose" aria-label="Close puzzle">&times;</button></div>
+  <div class="puz-stage" id="puzStage"></div>
+</div>
+
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script src="letter.js"></script>
 <!-- NEW: the pumpkin step (must come AFTER letter.js). The pumpkin picture is built into this file. -->
 <script src="pumpkin.js"></script>
+<!-- NEW: the final puzzle (must come AFTER letter.js and pumpkin.js) -->
+<script src="puzzle.js"></script>
 </body>
 </html>

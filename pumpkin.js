@@ -158,7 +158,12 @@
     .ltnote.show .ltsheet{opacity:1;transform:none;pointer-events:auto}
     .ltin{border:2px dotted rgba(0,48,73,.4);padding:clamp(16px,4.5vw,32px) clamp(16px,5vw,36px)}
     .ltin p{margin:0 0 1em}
-    .ltin p:last-child{margin-bottom:0}
+    .ltin p:last-of-type{margin-bottom:0}
+    .ltact{display:flex;justify-content:center;margin-top:1.5em;opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,1,.36,1),visibility 0s .6s}
+    .ltact.show{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+    .ltbtn{border:0;border-radius:999px;padding:9px 22px;background:#0B3B3A;color:#DFF7F2;font:700 15px var(--font,system-ui,sans-serif);cursor:pointer;transition:background .2s,transform .2s}
+    .ltbtn:hover{background:#072a29;transform:translateY(-2px)}
+    .ltbtn:focus-visible{outline:2px solid #1FBFAD;outline-offset:3px}
 
     .pumpkin.exit{pointer-events:none}
     .pumpkin.exit .pslide{translate:125vw 0;transition:translate .95s cubic-bezier(.65,0,.35,1)}
@@ -167,7 +172,7 @@
     .pscene.show{visibility:visible}
     .pscene h1{margin:0;font:700 clamp(34px,8vw,80px)/1.1 var(--font,system-ui,sans-serif);color:var(--ink,#0B3B3A);opacity:0;translate:0 26px;transition:opacity .7s .55s,translate .9s cubic-bezier(.22,1,.36,1) .55s}
     .pscene.show h1{opacity:1;translate:0 0}
-    @media(prefers-reduced-motion:reduce){.ltsheet{transition:none}.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1,.phwrap,.phammer,.lt,.lt-paper,.lt-hearts,.lt-shadow{transition:none;animation:none}.lt-valentines,.lt-h{animation:none!important}}
+    @media(prefers-reduced-motion:reduce){.ltsheet,.ltact{transition:none}.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1,.phwrap,.phammer,.lt,.lt-paper,.lt-hearts,.lt-shadow{transition:none;animation:none}.lt-valentines,.lt-h{animation:none!important}}
     `;
     document.head.appendChild(st);
 
@@ -276,6 +281,7 @@
       <p>We have currently reached the one before the last bestie for this year. One more of her and she has officially clocked all pre adult besties. Safe to say she's had quite the battles with her and there's a lot more of her coming your way, but let me let you on in a secret...well not exactly a secret it's more of a fact which is SHE IS GOING TO CLOCK THIS MONTHS BESTIE AND EVERY MONTHS BESTIE THAT WILL COME HER WAY BECAUSE SHE IS THE STRONGEST, COOLEST, FLAWLESS, MAGNIFICENTESTEST AND MOST INDEPENDESTEST PRINCESS THERE IS.</p>
       <p>She could be reading this when she is properly dying so stay strong ma'am you got this okay hang in there and get well soon (Biiiiiiiiiiiiiiiiig Hugggggggg) (if I gave this irl she's side eyeing me only) and if you need to complain about bestie, doesn't matter where I am, please I am here to hear you out and complain with you okay. NO MATTER THE TIME OR PLACE (insert the *we will be there no matter what* sticker).</p>
       <p>So stay strong, big smiles, no sads and get well soon &lt;3.</p>
+      <div class="ltact" id="ltact"><button type="button" class="ltbtn" id="ltfinal">Final Puzzle</button></div>
     </div></div></div>`;
     let noteEl = null, noted = false;
     function showNote() {                                              // the envelope drops away and fades, the full letter rises into the middle
@@ -286,6 +292,15 @@
       (layer || document.body).appendChild(noteEl);
       void noteEl.offsetWidth;
       requestAnimationFrame(() => noteEl.classList.add('show'));
+
+      /* the "Final Puzzle" button appears once the reader reaches the very bottom of the letter
+         (if the whole letter already fits on screen it appears after a few seconds instead) */
+      const sheet = noteEl.querySelector('.ltsheet'), act = noteEl.querySelector('#ltact'), btn = noteEl.querySelector('#ltfinal');
+      const reveal = () => act.classList.add('show');
+      const atEnd = () => sheet.scrollTop + sheet.clientHeight >= sheet.scrollHeight - 28;
+      sheet.addEventListener('scroll', () => { if (atEnd()) reveal(); }, { passive: true });
+      setTimeout(() => { if (atEnd()) reveal(); }, rm ? 0 : 4000);
+      btn.addEventListener('click', () => { if (typeof window.startFinalPuzzle === 'function') window.startFinalPuzzle(); });
     }
 
     /* ---------- state ---------- */

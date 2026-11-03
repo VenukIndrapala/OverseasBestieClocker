@@ -30,7 +30,7 @@
     const LETTER_HTML =
       '<div class="lt" id="plt"><div class="lt-valentines"><div class="lt-env">' +
         '<div class="lt-back"></div>' +
-        '<div class="lt-paper"><div class="lt-text">To my<br>Crush<br>I love You!</div><div class="lt-heart"></div></div>' +
+        '<div class="lt-paper"><div class="lt-text">Dear Nati,</div><i class="lt-ln"></i><i class="lt-ln"></i><i class="lt-ln s"></i></div>' +
         '<div class="lt-front"><svg viewBox="0 0 300 200" preserveAspectRatio="none" aria-hidden="true">' +
           '<path d="M0 0 L150 112 L0 200 Z" fill="#f3dcae"/><path d="M300 0 L150 112 L300 200 Z" fill="#eed3a0"/><path d="M0 200 L150 112 L300 200 Z" fill="#f8e7c6"/>' +
           '<path d="M0 0 L150 112 L300 0 M0 200 L150 112 L300 200" fill="none" stroke="rgba(150,100,40,.28)" stroke-width="1.2"/></svg></div>' +
@@ -111,21 +111,19 @@
 
     /* ---- the letter (sits inside the pumpkin; its flap opens, it flies out + enlarges, hearts rise) ---- */
     .lt{position:absolute;left:50%;top:60%;width:300px;height:200px;pointer-events:none;transform-origin:center center;transform:translate(-50%,-50%) scale(var(--ls,.5))}
-    .lt.fly{position:fixed;left:50%;top:50%;transition:transform 1.2s cubic-bezier(.22,1,.36,1)}
+    .lt.fly{position:fixed;left:50%;top:50%;transition:transform 1.2s cubic-bezier(.22,1,.36,1),opacity .9s ease}
     .ltlayer{position:fixed;inset:0;z-index:605;pointer-events:none}
     .lt-valentines{position:relative;width:300px;height:200px}
     .lt.show .lt-valentines{animation:lt-up 3s ease-in-out infinite}
     @keyframes lt-up{0%,100%{transform:translateY(0)}50%{transform:translateY(-22px)}}
     .lt-env{position:relative;width:300px;height:200px;perspective:1400px}
     .lt-back{position:absolute;inset:0;border-radius:2px;background:linear-gradient(160deg,#f6dba9,#efd09a);box-shadow:0 14px 28px rgba(91,42,38,.22),inset 0 0 26px -8px rgba(150,100,40,.35)}
-    .lt-paper{position:absolute;left:4.5%;right:4.5%;top:0;height:80%;z-index:0;background:linear-gradient(#f2e1c8,#f8ead6 16%,#f7e9d4);box-shadow:inset 0 8px 10px -6px rgba(140,95,40,.38);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:translate .9s cubic-bezier(.22,1,.36,1)}
+    .lt-paper{position:absolute;left:4.5%;right:4.5%;top:0;height:80%;z-index:0;background:linear-gradient(#f2e1c8,#f8ead6 16%,#f7e9d4);box-shadow:inset 0 8px 10px -6px rgba(140,95,40,.38);display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:13px;padding:30px 26px;transition:translate .9s cubic-bezier(.22,1,.36,1)}
     .lt-paper:before{content:"";position:absolute;inset:9px;border:2px dotted rgba(0,48,73,.4);pointer-events:none}
     .lt.out .lt-paper{z-index:1;translate:0 -58%}
-    .lt-text{font:400 30px/1.05 "Brush Script MT","Lobster Two",cursive;color:#5B2A26;text-align:center;white-space:nowrap}
-    .lt-heart{position:relative;width:20px;height:20px;background:#d62828;transform:rotate(-45deg);margin-top:4px}
-    .lt-heart:before,.lt-heart:after{content:"";position:absolute;width:20px;height:20px;border-radius:60%;background:#d62828}
-    .lt-heart:before{top:-10px;left:0}
-    .lt-heart:after{left:10px;top:0}
+    .lt-text{font:400 30px/1.05 "Brush Script MT","Lobster Two",cursive;color:#5B2A26;text-align:left;white-space:nowrap}
+    .lt-ln{display:block;height:2px;border-radius:2px;background:rgba(110,80,60,.24)}
+    .lt-ln.s{width:60%}
     .lt-front{position:absolute;inset:0;z-index:2;border-radius:2px;overflow:hidden;pointer-events:none}
     .lt-front svg{display:block;width:100%;height:100%}
     .lt-flap{position:absolute;left:0;top:0;width:100%;height:56%;z-index:3;transform-origin:50% 0;transform-style:preserve-3d;pointer-events:none;will-change:transform}
@@ -149,6 +147,22 @@
     @keyframes lt-scale{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.85)}}
     @media(prefers-reduced-motion:reduce){.lt.openenv .lt-flap{animation:none;transform:rotateX(-180deg);z-index:0}.lt-paper{transition:none}}
 
+    /* ---- the note: a full-size letter sheet that rises out of the envelope and settles in the middle of the screen ---- */
+    .ltnote{position:fixed;inset:0;display:grid;place-items:center;padding:16px;pointer-events:none}
+    .ltsheet,.ltsheet *{font-family:"Brush Script MT","Lobster Two",cursive}
+    .ltsheet{width:min(620px,92vw);max-height:min(88vh,88dvh);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:rgba(110,80,60,.45) transparent;
+      padding:12px;border-radius:4px;background:linear-gradient(#f2e1c8,#f8ead6 5%,#f7e9d4);box-shadow:0 26px 60px rgba(11,59,58,.28),inset 0 8px 10px -6px rgba(140,95,40,.38);
+      color:#5B2A26;font-size:clamp(18px,4.4vw,23px);line-height:1.42;text-wrap:pretty;overflow-wrap:break-word;
+      opacity:0;transform:translateY(22vh) scale(.45);transform-origin:50% 100%;
+      transition:opacity .7s ease,transform 1.05s cubic-bezier(.22,1,.36,1)}
+    .ltnote.show .ltsheet{opacity:1;transform:none;pointer-events:auto}
+    .ltin{border:2px dotted rgba(0,48,73,.4);padding:clamp(16px,4.5vw,32px) clamp(16px,5vw,36px)}
+    .ltin p{margin:0 0 .8em}
+    .ltin .ltsal{font-size:1.3em;margin-bottom:.55em}
+    .ltin .ltcaps,.ltcaps{font-weight:700;color:#b3382a;font-size:.93em;line-height:1.38}
+    .ltin p.ltcaps{margin:.2em 0 .9em;padding-left:.8em;border-left:3px solid rgba(179,56,42,.45)}
+    .ltin .ltend{margin:.3em 0 0;font-size:1.12em}
+
     .pumpkin.exit{pointer-events:none}
     .pumpkin.exit .pslide{translate:125vw 0;transition:translate .95s cubic-bezier(.65,0,.35,1)}
     .pumpkin.gone{display:none}
@@ -156,7 +170,7 @@
     .pscene.show{visibility:visible}
     .pscene h1{margin:0;font:700 clamp(34px,8vw,80px)/1.1 var(--font,system-ui,sans-serif);color:var(--ink,#0B3B3A);opacity:0;translate:0 26px;transition:opacity .7s .55s,translate .9s cubic-bezier(.22,1,.36,1) .55s}
     .pscene.show h1{opacity:1;translate:0 0}
-    @media(prefers-reduced-motion:reduce){.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1,.phwrap,.phammer,.lt,.lt-paper,.lt-hearts,.lt-shadow{transition:none;animation:none}.lt-valentines,.lt-h{animation:none!important}}
+    @media(prefers-reduced-motion:reduce){.ltsheet{transition:none}.pslide,.phint,.pshadow,.scratch.out .swrap,.pumpkin.exit .pslide,.pscene h1,.phwrap,.phammer,.lt,.lt-paper,.lt-hearts,.lt-shadow{transition:none;animation:none}.lt-valentines,.lt-h{animation:none!important}}
     `;
     document.head.appendChild(st);
 
@@ -207,7 +221,7 @@
     const finalScale = () => clamp(Math.min(innerWidth * .8 / 300, innerHeight * .58 / 330), .5, 1.8);
     const setLT = (dx, dy, s) => { lt.style.transform = 'translate(' + dx + 'px,' + dy + 'px) translate(-50%,-50%) scale(' + s + ')'; };
     const placeFinal = () => { const s = finalScale(); setLT(0, (20 * s).toFixed(1), s.toFixed(3)); };
-    setLs(); addEventListener('resize', () => { if (!flown) setLs(); else if (live) { lt.style.transition = 'none'; placeFinal(); } });
+    setLs(); addEventListener('resize', () => { if (!flown) setLs(); else if (live && !noted) { lt.style.transition = 'none'; placeFinal(); } });
 
     /* five hearts begin inside the visible letter area and float upward with staggered timing */
     (() => {
@@ -247,13 +261,36 @@
       placeFinal();
       setTimeout(() => {
         live = true; lt.classList.add('show');
-        setTimeout(() => { lt.classList.add('out'); document.dispatchEvent(new CustomEvent('pumpkin:done')); }, rm ? 0 : 500);
+        setTimeout(() => {
+          lt.classList.add('out'); document.dispatchEvent(new CustomEvent('pumpkin:done'));
+          setTimeout(showNote, rm ? 0 : 1000);                         // the paper has slid out: now the full letter appears
+        }, rm ? 0 : 500);
       }, rm ? 0 : 1250);
     }
     function showLetterNow() {                                         // used if the pumpkin could not be built
       liftLetter(); lt.classList.add('openenv');
       lt.style.transition = 'none'; placeFinal(); live = true; lt.classList.add('show');
-      setTimeout(() => lt.classList.add('out'), rm ? 0 : 900);
+      setTimeout(() => { lt.classList.add('out'); setTimeout(showNote, rm ? 0 : 1000); }, rm ? 0 : 900);
+    }
+
+    /* ---------- the note (the letter's text) ---------- */
+    const NOTE_HTML = `<div class="ltnote" id="ltnote"><div class="ltsheet" tabindex="0" role="document" aria-label="Letter"><div class="ltin">
+      <p class="ltsal">Dear Nati,</p>
+      <p>We have currently reached the one before the last bestie for this year. One more of her and she has officially clocked all pre adult besties. Safe to say she's had quite the battles with her and there's a lot more of her coming your way, but let me let you on in a secret...well not exactly a secret it's more of a fact which is</p>
+      <p class="ltcaps">SHE IS GOING TO CLOCK THIS MONTHS BESTIE AND EVERY MONTHS BESTIE THAT WILL COME HER WAY BECAUSE SHE IS THE STRONGEST, COOLEST, FLAWLESS, MAGNIFICENTESTEST AND MOST INDEPENDESTEST PRINCESS THERE IS.</p>
+      <p>She could be reading this when she is properly dying so stay strong ma'am you got this okay hang in there and get well soon (Biiiiiiiiiiiiiiiiig Hugggggggg) (if I gave this irl she's side eyeing me only) and if you need to complain about bestie, doesn't matter where I am, please I am here to hear you out and complain with you okay.</p>
+      <p><span class="ltcaps">NO MATTER THE TIME OR PLACE</span> (insert the *we will be there no matter what* sticker).</p>
+      <p class="ltend">So stay strong, big smiles, no sads and get well soon &lt;3.</p>
+    </div></div></div>`;
+    let noteEl = null, noted = false;
+    function showNote() {                                              // the envelope drops away and fades, the full letter rises into the middle
+      if (noteEl) return; noted = true;
+      lt.style.opacity = '0';
+      setLT(0, (innerHeight * .5).toFixed(1), (finalScale() * .8).toFixed(3));
+      const w = document.createElement('div'); w.innerHTML = NOTE_HTML; noteEl = w.firstElementChild;
+      (layer || document.body).appendChild(noteEl);
+      void noteEl.offsetWidth;
+      requestAnimationFrame(() => noteEl.classList.add('show'));
     }
 
     /* ---------- state ---------- */

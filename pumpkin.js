@@ -4,7 +4,7 @@
    ---------------------------------------------------------------------
    1. when the prize is revealed (#scratch gets "cleared") wait 5 seconds
    2. the scratch card slides up and out, the coin fades, the pumpkin slides in from the bottom
-   3. THREE BOXES under the pumpkin: type the code (5 in each box) to unlock the hammer (on the right)
+   3. THREE BOXES under the pumpkin: type 555 -> a teasing message shows for 4 s and slides away -> type the real code 530 to unlock the hammer (on the right)
    4. DRAG the hammer and DROP it on the pumpkin. Only the piece you drop it on breaks.
       Do this on five different pieces. A drop on empty space / a broken piece springs back.
    5. when the 5th piece has fallen the closed envelope (hidden inside the pumpkin all along) opens where it sits,
@@ -707,21 +707,59 @@
       else pctx.clearRect(0, 0, innerWidth, innerHeight);
     }
 
-    /* ---------- hint text (only two messages: enter the code, then drag the hammer) ---------- */
-    function updateHint() {
+    /* ---------- hint text under the pumpkin ----------
+       swapHint(): the old text slides DOWN and out, then the new text drops in from above. */
+    let hintAnim = null;
+    function swapHint(text, cb) {
+      if (hintAnim) { hintAnim.cancel(); hintAnim = null; }
+      const done = () => { hint.textContent = text; if (cb) cb(); };
+      if (rm || !hint.animate) { done(); return; }
+      const out = hint.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(36px)', opacity: 0 }],
+                               { duration: 480, easing: 'ease-in', fill: 'forwards' });
+      hintAnim = out;
+      out.onfinish = () => {
+        done(); out.cancel();
+        hintAnim = hint.animate([{ transform: 'translateY(-26px)', opacity: 0 }, { transform: 'translateY(0)', opacity: 1 }],
+                                { duration: 520, easing: 'cubic-bezier(.22,1,.36,1)' });
+      };
+    }
+    function updateHint() {                                            // used after the hammer is unlocked / the game is won
       if (won) { hint.textContent = ''; return; }
-      hint.textContent = unlocked ? 'Drag the hammer and drop it' : 'Enter code to unlock the hammer';
+      if (unlocked) hint.textContent = 'Drag the hammer and drop it';
     }
 
-    /* ---------- the three code boxes: one digit each, 5 / 5 / 5 unlocks the hammer ---------- */
-    const CODE = '555';
+    /* ---------- the three code boxes: one digit each ----------
+       step 0: waiting for the fake code 555  -> shows the "easy huh?" message, boxes lock for 4 seconds
+       step 1: that message is showing (boxes locked)
+       step 2: after the message slides away the boxes clear and wait for the real code 530 -> hammer unlocks */
+    const FAKE_CODE = '555', REAL_CODE = '530', TAUNT_MS = 4000;
+    let codeStep = 0, codeBusy = false, tauntTimer = 0;
+    const locked = () => !ready || unlocked || codeBusy;
+    const codeValue = () => boxes.map(x => x.value).join('');
+
     function checkCode() {
-      if (unlocked || !boxes.every(x => x.value)) return;
-      if (boxes.map(x => x.value).join('') !== CODE) return;
+      if (locked() || !boxes.every(x => x.value)) return;
+      if (codeStep === 0 && codeValue() === FAKE_CODE) tauntUser();
+      else if (codeStep === 2 && codeValue() === REAL_CODE) unlockHammer();
+    }
+    function tauntUser() {
+      codeStep = 1; codeBusy = true;
+      boxes.forEach(x => { x.readOnly = true; x.blur(); });
+      swapHint("You thought it'd be that easy huh? (ioi)");
+      clearTimeout(tauntTimer);
+      tauntTimer = setTimeout(() => {                                  // 4 seconds later: that text slides out, the next one comes in
+        swapHint("The real code was in the email and I quote 'lol'", () => {
+          boxes.forEach(x => { x.value = ''; x.readOnly = false; });   // fresh boxes for the real code
+          codeStep = 2; codeBusy = false;
+          if (matchMedia('(hover:hover)').matches) boxes[0].focus({ preventScroll: true });
+        });
+      }, rm ? TAUNT_MS : TAUNT_MS + 520);                              // 4 s of reading time after the message has finished arriving
+    }
+    function unlockHammer() {
       unlocked = true;
       boxes.forEach(x => { x.readOnly = true; x.classList.add('on'); x.blur(); });
       ham.classList.add('unlocked');
-      updateHint();
+      swapHint('Drag the hammer and drop it');
     }
     function enableCode() {                                            // called once the pumpkin has slid in
       ready = true;
@@ -731,19 +769,19 @@
     boxes.forEach((b, i) => {
       b.addEventListener('focus', () => { if (!b.readOnly) b.select(); });
       b.addEventListener('input', () => {
-        if (!ready || unlocked) { b.value = ''; return; }
-        b.value = b.value.replace(/\D/g, '').slice(-1);               // digits only
+        if (locked()) { return; }
+        b.value = b.value.replace(/\D/g, '').slice(-1);                // digits only
         if (b.value && i < boxes.length - 1) boxes[i + 1].focus();
         checkCode();
       });
       b.addEventListener('keydown', e => {
-        if (!ready || unlocked) return;
+        if (locked()) return;
         if (e.key === 'Backspace' && !b.value && i > 0) { e.preventDefault(); boxes[i - 1].value = ''; boxes[i - 1].focus(); }
         else if (e.key === 'ArrowLeft' && i > 0) { e.preventDefault(); boxes[i - 1].focus(); }
         else if (e.key === 'ArrowRight' && i < boxes.length - 1) { e.preventDefault(); boxes[i + 1].focus(); }
       });
-      b.addEventListener('paste', e => {                               // pasting "555" fills all three boxes
-        if (!ready || unlocked) return;
+      b.addEventListener('paste', e => {                               // pasting a 3-digit code fills all three boxes
+        if (locked()) return;
         e.preventDefault();
         const d = ((e.clipboardData || window.clipboardData).getData('text') || '').replace(/\D/g, '');
         if (!d) return;

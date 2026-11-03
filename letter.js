@@ -158,9 +158,6 @@ const CW = 760, CH = 359;                                            // canvas p
 cv.width = CW; cv.height = CH;
 let scratchOn = false, scratchLive = false, cleared = false, lastPt = null, checkT = 0;
 
-/* the canvas can not read the CSS variable, so the page font (Runtime) is spelled out here - keep it the same as --font in letter.css */
-const CANVAS_FONT = '"Runtime", "Trebuchet MS", "Segoe UI", system-ui, sans-serif';
-
 function drawSilver() {
   ctx.globalCompositeOperation = 'source-over';
   const g = ctx.createLinearGradient(0, 0, CW, 0);                   // the metallic base: light in the middle, darker toward the right end
@@ -176,17 +173,8 @@ function drawSilver() {
     for (let x = 0; x <= CW; x += 8) { const y = i * 26 + x * .12 + Math.sin(x / 115 + i * .05) * 18; x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
     ctx.stroke();
   }
-
-  ctx.fillStyle = 'rgba(206,209,219,.96)';                           // the "Scratch & Win" disc
-  ctx.beginPath(); ctx.arc(CW / 2, CH / 2, CH * .31, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#9a9eaa'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.font = '400 37px ' + CANVAS_FONT;
-  ctx.fillText('Scratch', CW / 2, CH / 2 - 42); ctx.fillText('&', CW / 2, CH / 2 + 1); ctx.fillText('Win', CW / 2, CH / 2 + 44);
 }
 drawSilver();
-if (document.fonts && document.fonts.load) {                         // draw again once the font has arrived
-  document.fonts.load('400 37px "Runtime"').then(() => { if (!cleared && !lastPt) drawSilver(); }).catch(() => {});
-}
 
 function enterScratch() {
   if (scratchOn) return; scratchOn = true;

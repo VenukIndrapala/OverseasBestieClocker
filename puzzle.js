@@ -15,6 +15,7 @@
   /* ------------------ SETTINGS: change these two lines to match your files ------------------ */
   const FINAL_VIDEO  = 'video/final.mp4';     // <- your video (put it in a folder called "video" next to index.html)
   const FINAL_POSTER = 'video/final.jpg';     // <- OPTIONAL screenshot of the video to use as the puzzle picture ('' = always take a frame from the video)
+  const PIECES_LONG = 6, PIECES_SHORT = 4;     // 6 x 4 = 24 pieces (long side x short side). Change these two numbers to resize the puzzle
   const FRAME_AT = 1;                         // seconds into the video where the still frame is taken (only used when there is no poster)
   /* ------------------------------------------------------------------------------------------- */
 
@@ -107,7 +108,7 @@
 
   function pzBuild() {
     const st = $('#puzStage'), W = st.clientWidth, Hh = st.clientHeight, iw = PZ.img.naturalWidth || 1200, ih = PZ.img.naturalHeight || 900;
-    const land = iw >= ih, cols = land ? 4 : 3, rows = land ? 3 : 4;
+    const land = iw >= ih, cols = land ? PIECES_LONG : PIECES_SHORT, rows = land ? PIECES_SHORT : PIECES_LONG;
     const sc = Math.min(W * 0.62 / iw, Hh * 0.52 / ih, 760 / iw), bw = Math.round(iw * sc), bh = Math.round(ih * sc);
     const cw = bw / cols, ch = bh / rows, pad = Math.round(0.27 * Math.max(cw, ch)), bx = Math.round((W - bw) / 2), by = Math.round((Hh - bh) / 2);
     const rnd = pzRng('final-puzzle'), sg = () => rnd() < .5 ? -1 : 1;

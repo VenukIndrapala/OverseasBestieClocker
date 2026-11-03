@@ -1,0 +1,36 @@
+/* puzzle.css - styles for the Final Puzzle overlay.
+   It uses the colour + font variables that already exist in letter.css (--bg, --ink, --ink2, --cream, --mint, --font),
+   so it does NOT redefine :root, #toast or [hidden]. */
+
+.puz[hidden]{display:none}
+.puz{position:fixed;inset:0;z-index:900;display:flex;flex-direction:column;background:var(--bg,#DFF7F2);color:var(--ink,#0B3B3A);animation:puzIn .35s ease both}
+@keyframes puzIn{from{opacity:0}}
+.puz-top{flex:none;display:flex;align-items:center;gap:14px;height:60px;padding:0 18px;border-bottom:1px solid rgba(11,59,58,.15)}
+.puz-top b{font:700 24px var(--font)}
+.puz-top span{flex:1;font:500 15px var(--font);color:var(--ink2,rgba(11,59,58,.72));text-align:right;padding-right:6px}
+.puz-x{flex:none;width:38px;height:38px;border:0;border-radius:50%;background:var(--cream,#F2E8D5);color:var(--ink,#0B3B3A);font:700 26px/1 var(--font);display:grid;place-items:center;padding:0 0 3px;cursor:pointer;transition:background .2s,transform .2s}
+.puz-x:hover{background:var(--mint,#7DE2D1);transform:scale(1.08)}
+.puz-x:focus-visible{outline:2px solid var(--ink,#0B3B3A);outline-offset:2px}
+.puz-stage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.pz-board{position:absolute;border-radius:6px;box-shadow:inset 0 0 0 2px rgba(11,59,58,.3);pointer-events:none}   /* just the frame outline - no picture preview */
+.pz{position:absolute;left:0;top:0;pointer-events:none;touch-action:none;will-change:transform;filter:drop-shadow(0 4px 7px rgba(11,59,58,.38))}
+.pz svg{display:block;overflow:visible;pointer-events:none}
+.pz-edge{fill:none;stroke:rgba(11,59,58,.45);stroke-width:1.2;stroke-linejoin:round;transition:opacity .6s}
+.pz-hit{fill:transparent;pointer-events:all;cursor:grab}
+.pz.drag{filter:drop-shadow(0 12px 14px rgba(11,59,58,.42))}
+.pz.drag .pz-hit{cursor:grabbing}
+.pz.snap{transition:transform .18s ease-out}
+.pz.lock{filter:none;z-index:1}
+.pz.lock .pz-hit{pointer-events:none}
+.puz-stage.solved .pz{opacity:0;transition:opacity .5s}
+
+/* the finished picture grows out of the board, then the video takes its place */
+.pfinal{position:absolute;opacity:0;border-radius:6px;box-shadow:0 18px 50px rgba(11,59,58,.35);transition:opacity .6s,transform .9s cubic-bezier(.22,1,.36,1);pointer-events:none}
+.pfinal.show{opacity:1}
+.pvid{position:absolute;display:block;object-fit:contain;background:#000;border-radius:6px;box-shadow:0 18px 50px rgba(11,59,58,.35);opacity:0;transition:opacity .5s}
+.pvid.show{opacity:1}
+
+body.puzopen{overflow:hidden}
+body.puzopen #toast{z-index:1000}
+@media(max-width:900px){.puz-top b{font-size:20px}.puz-top span{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.puz,.pz.snap,.pfinal,.pvid{transition:none;animation:none}}

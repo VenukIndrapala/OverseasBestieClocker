@@ -172,7 +172,7 @@
           '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 2"></button>' +
           '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 3"></button>' +
         '</div>' +
-        '<p class="phint" id="phint">Tick all three boxes to unlock the hammer</p>' +
+        '<p class="phint" id="phint">Enter code to unlock the hammer</p>' +
         '<div class="phwrap" id="phwrap"><div class="phammer" id="phammer" aria-label="Hammer"><img class="phimg" id="phimg" src="' + HAMMER_SRC + '" alt="" draggable="false"></div></div>' +
       '</div>';
     document.body.appendChild(sec);
@@ -712,7 +712,7 @@
     function updateHint() {
       const left = 5 - removed.filter(Boolean).length;
       if (won) { hint.textContent = ''; return; }
-      if (!unlocked) hint.textContent = 'Tick all three boxes to unlock the hammer';
+      if (!unlocked) hint.textContent = 'Enter code to unlock the hammer';
       else if (left === 5) hint.textContent = 'Drag the hammer onto the pumpkin and drop it';
       else hint.textContent = left + ' more \u2013 drop the hammer on another spot';
     }

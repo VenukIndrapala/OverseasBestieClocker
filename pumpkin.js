@@ -4,7 +4,7 @@
    ---------------------------------------------------------------------
    1. when the prize is revealed (#scratch gets "cleared") wait 5 seconds
    2. the scratch card slides up and out, the coin fades, the pumpkin slides in from the bottom
-   3. THREE BOXES under the pumpkin: tick all three to unlock the hammer (on the right)
+   3. THREE BOXES under the pumpkin: type the code (5 in each box) to unlock the hammer (on the right)
    4. DRAG the hammer and DROP it on the pumpkin. Only the piece you drop it on breaks.
       Do this on five different pieces. A drop on empty space / a broken piece springs back.
    5. when the 5th piece has fallen the closed envelope (hidden inside the pumpkin all along) opens where it sits,
@@ -14,7 +14,7 @@
    If IMG_SHADOW / IMG_STEM / IMG_PIECES are empty the script draws its own pumpkin.
    Paste your own picture data into the three constants below to use your pictures.
 
-   COLOURS: the three tick boxes use the page palette (teal #1FBFAD, cream #F2E8D5, dark teal #0B3B3A, mint #DFF7F2).
+   COLOURS: the three code boxes use the page palette (teal #1FBFAD, cream #F2E8D5, dark teal #0B3B3A, mint #DFF7F2).
    The pumpkin and the letter envelope keep their own colours.
    ===================================================================== */
 (() => {
@@ -93,13 +93,12 @@
     .phint{margin:0;min-height:1.4em;max-width:100%;text-align:center;font:500 15px var(--font,system-ui,sans-serif);color:var(--ink2,rgba(11,59,58,.72));opacity:0;transition:opacity .5s 1.8s}
     .pumpkin.show .phint{opacity:1}
 
-    /* the three boxes (page palette: teal / cream / dark teal) */
+    /* the three code boxes (page palette: teal / cream / dark teal) - each one takes a single digit */
     .pboxes{display:flex;gap:14px}
-    .pbox{appearance:none;-webkit-appearance:none;position:relative;width:40px;height:40px;padding:0;border-radius:10px;border:3px solid #1FBFAD;background:#F2E8D5;cursor:pointer;transition:background .2s,border-color .2s,transform .15s}
-    .pbox:active{transform:scale(.92)}
-    .pbox:focus-visible{outline:2px solid #0B3B3A;outline-offset:3px}
-    .pbox.on{background:#1FBFAD;border-color:#0B3B3A}
-    .pbox.on::after{content:'';position:absolute;left:12px;top:4px;width:10px;height:20px;border:solid #DFF7F2;border-width:0 4px 4px 0;transform:rotate(45deg)}
+    .pbox{appearance:none;-webkit-appearance:none;position:relative;width:40px;height:40px;padding:0;margin:0;border-radius:10px;border:3px solid #1FBFAD;background:#F2E8D5;color:#0B3B3A;caret-color:#1FBFAD;text-align:center;font:700 20px var(--font,system-ui,sans-serif);cursor:text;-webkit-user-select:text;user-select:text;transition:background .2s,border-color .2s,color .2s,transform .15s}
+    .pbox:focus{outline:2px solid #0B3B3A;outline-offset:3px}
+    .pbox[readonly]{cursor:default}
+    .pbox.on{background:#1FBFAD;border-color:#0B3B3A;color:#DFF7F2}
 
     /* the hammer */
     .phwrap{position:absolute;left:calc(100% + 2px);top:8%;width:min(120px,16vw);aspect-ratio:740/660;z-index:5;pointer-events:none;transition:opacity .5s}
@@ -163,14 +162,14 @@
 
     /* ---------- markup ---------- */
     const sec = document.createElement('section');
-    sec.className = 'pumpkin'; sec.setAttribute('aria-label', 'Pumpkin. Tick the three boxes, then drag the hammer onto the pumpkin.');
+    sec.className = 'pumpkin'; sec.setAttribute('aria-label', 'Pumpkin. Type the code in the three boxes, then drag the hammer and drop it on the pumpkin.');
     sec.innerHTML =
       '<div class="pslide">' +
         '<div class="pstage" id="pstage"><div class="pshadow" id="pshadow"></div>' + LETTER_HTML + '<div class="pstem" id="pstem"></div></div>' +
         '<div class="pboxes" id="pboxes">' +
-          '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 1"></button>' +
-          '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 2"></button>' +
-          '<button type="button" class="pbox" role="checkbox" aria-checked="false" aria-label="Box 3"></button>' +
+          '<input class="pbox" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" spellcheck="false" readonly aria-label="Code digit 1">' +
+          '<input class="pbox" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" spellcheck="false" readonly aria-label="Code digit 2">' +
+          '<input class="pbox" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" spellcheck="false" readonly aria-label="Code digit 3">' +
         '</div>' +
         '<p class="phint" id="phint">Enter code to unlock the hammer</p>' +
         '<div class="phwrap" id="phwrap"><div class="phammer" id="phammer" aria-label="Hammer"><img class="phimg" id="phimg" src="' + HAMMER_SRC + '" alt="" draggable="false"></div></div>' +
@@ -259,7 +258,7 @@
 
     /* ---------- state ---------- */
     let built = false, buildP = null, starting = false, started = false, ready = false, won = false;
-    let unlocked = false, busy = false, drag = null, hintTimer = 0;
+    let unlocked = false, busy = false, drag = null;
     let body, bctx, srcData, op, opIdx, label, chunkId, goneA, rdA, stemA;
     let regPix = [], regCent = [], regSeed = [], regArea = [], chunks = [];
     let totalArea = 1, pcx = S / 2, pcy = S / 2, shadowG = .9, stemOrigin = '50% 20%';
@@ -708,30 +707,51 @@
       else pctx.clearRect(0, 0, innerWidth, innerHeight);
     }
 
-    /* ---------- hint text ---------- */
+    /* ---------- hint text (only two messages: enter the code, then drag the hammer) ---------- */
     function updateHint() {
-      const left = 5 - removed.filter(Boolean).length;
       if (won) { hint.textContent = ''; return; }
-      if (!unlocked) hint.textContent = 'Enter code to unlock the hammer';
-      else if (left === 5) hint.textContent = 'Drag the hammer onto the pumpkin and drop it';
-      else hint.textContent = left + ' more \u2013 drop the hammer on another spot';
-    }
-    function flashHint(msg) {
-      hint.textContent = msg;
-      clearTimeout(hintTimer);
-      hintTimer = setTimeout(updateHint, 2200);
+      hint.textContent = unlocked ? 'Drag the hammer and drop it' : 'Enter code to unlock the hammer';
     }
 
-    /* ---------- the three boxes ---------- */
-    boxes.forEach(b => b.addEventListener('click', () => {
-      if (!ready || b.classList.contains('on')) return;
-      b.classList.add('on'); b.setAttribute('aria-checked', 'true');
-      if (boxes.every(x => x.classList.contains('on'))) {
-        unlocked = true;
-        ham.classList.add('unlocked');
-        updateHint();
-      }
-    }));
+    /* ---------- the three code boxes: one digit each, 5 / 5 / 5 unlocks the hammer ---------- */
+    const CODE = '555';
+    function checkCode() {
+      if (unlocked || !boxes.every(x => x.value)) return;
+      if (boxes.map(x => x.value).join('') !== CODE) return;
+      unlocked = true;
+      boxes.forEach(x => { x.readOnly = true; x.classList.add('on'); x.blur(); });
+      ham.classList.add('unlocked');
+      updateHint();
+    }
+    function enableCode() {                                            // called once the pumpkin has slid in
+      ready = true;
+      boxes.forEach(x => { x.readOnly = false; });
+      if (matchMedia('(hover:hover)').matches) boxes[0].focus({ preventScroll: true });   // no auto-keyboard on phones
+    }
+    boxes.forEach((b, i) => {
+      b.addEventListener('focus', () => { if (!b.readOnly) b.select(); });
+      b.addEventListener('input', () => {
+        if (!ready || unlocked) { b.value = ''; return; }
+        b.value = b.value.replace(/\D/g, '').slice(-1);               // digits only
+        if (b.value && i < boxes.length - 1) boxes[i + 1].focus();
+        checkCode();
+      });
+      b.addEventListener('keydown', e => {
+        if (!ready || unlocked) return;
+        if (e.key === 'Backspace' && !b.value && i > 0) { e.preventDefault(); boxes[i - 1].value = ''; boxes[i - 1].focus(); }
+        else if (e.key === 'ArrowLeft' && i > 0) { e.preventDefault(); boxes[i - 1].focus(); }
+        else if (e.key === 'ArrowRight' && i < boxes.length - 1) { e.preventDefault(); boxes[i + 1].focus(); }
+      });
+      b.addEventListener('paste', e => {                               // pasting "555" fills all three boxes
+        if (!ready || unlocked) return;
+        e.preventDefault();
+        const d = ((e.clipboardData || window.clipboardData).getData('text') || '').replace(/\D/g, '');
+        if (!d) return;
+        for (let k = 0; k < d.length && i + k < boxes.length; k++) boxes[i + k].value = d[k];
+        boxes[Math.min(i + d.length, boxes.length - 1)].focus();
+        checkCode();
+      });
+    });
 
     /* ---------- the hammer: drag it, drop it, the piece under the hammer head breaks ---------- */
     const setT = (dx, dy, s, rot) => { ham.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + s + ') rotate(' + rot + 'deg)'; };
@@ -781,12 +801,7 @@
       const d = drag; drag = null; busy = true;
       const hx = d.hx + d.dx, hy = d.hy + d.dy;
       const tg = e.type === 'pointercancel' ? null : findTarget(hx, hy);
-      if (!tg) {                                                          // dropped in the wrong place -> spring back
-        const out = !(op && (() => { const r = stage.getBoundingClientRect(); const px = Math.round((hx - r.left) / r.width * S), py = Math.round((hy - r.top) / r.height * S); return px >= 0 && py >= 0 && px < S && py < S && op[py * S + px]; })());
-        if (e.type !== 'pointercancel') flashHint(out ? 'Drop the hammer right on the pumpkin' : 'That piece is already broken \u2013 try another spot');
-        goHome();
-        return;
-      }
+      if (!tg) { goHome(); return; }                                      // dropped in the wrong place -> spring back, no message
       if (rm) { startCrack(tg.id, tg.px, tg.py); goHome(); return; }
       ham.style.transition = 'transform .11s ease-in';                    // swing down
       setT(d.dx, d.dy, 1.5, 20);
@@ -825,7 +840,7 @@
           return;
         }
         sec.classList.add('show');
-        setTimeout(() => { ready = true; }, rm ? 0 : 1900);
+        setTimeout(enableCode, rm ? 0 : 1900);
       });
     }
     function arm() {

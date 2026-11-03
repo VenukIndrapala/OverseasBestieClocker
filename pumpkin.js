@@ -121,7 +121,7 @@
     .lt-paper{position:absolute;left:4.5%;right:4.5%;top:0;height:80%;z-index:0;background:linear-gradient(#f2e1c8,#f8ead6 16%,#f7e9d4);box-shadow:inset 0 8px 10px -6px rgba(140,95,40,.38);display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:13px;padding:30px 26px;transition:translate .9s cubic-bezier(.22,1,.36,1)}
     .lt-paper:before{content:"";position:absolute;inset:9px;border:2px dotted rgba(0,48,73,.4);pointer-events:none}
     .lt.out .lt-paper{z-index:1;translate:0 -58%}
-    .lt-text{font:400 30px/1.05 "Brush Script MT","Lobster Two",cursive;color:#5B2A26;text-align:left;white-space:nowrap}
+    .lt-text{font:400 24px/1.1 var(--font,system-ui,sans-serif);color:#5B2A26;text-align:left;white-space:nowrap}
     .lt-ln{display:block;height:2px;border-radius:2px;background:rgba(110,80,60,.24)}
     .lt-ln.s{width:60%}
     .lt-front{position:absolute;inset:0;z-index:2;border-radius:2px;overflow:hidden;pointer-events:none}
@@ -149,19 +149,16 @@
 
     /* ---- the note: a full-size letter sheet that rises out of the envelope and settles in the middle of the screen ---- */
     .ltnote{position:fixed;inset:0;display:grid;place-items:center;padding:16px;pointer-events:none}
-    .ltsheet,.ltsheet *{font-family:"Brush Script MT","Lobster Two",cursive}
+    .ltsheet,.ltsheet *{font-family:var(--font,system-ui,sans-serif)}
     .ltsheet{width:min(620px,92vw);max-height:min(88vh,88dvh);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:rgba(110,80,60,.45) transparent;
       padding:12px;border-radius:4px;background:linear-gradient(#f2e1c8,#f8ead6 5%,#f7e9d4);box-shadow:0 26px 60px rgba(11,59,58,.28),inset 0 8px 10px -6px rgba(140,95,40,.38);
-      color:#5B2A26;font-size:clamp(18px,4.4vw,23px);line-height:1.42;text-wrap:pretty;overflow-wrap:break-word;
+      color:#5B2A26;font-size:clamp(15px,3.9vw,18px);line-height:1.6;text-wrap:pretty;overflow-wrap:break-word;
       opacity:0;transform:translateY(22vh) scale(.45);transform-origin:50% 100%;
       transition:opacity .7s ease,transform 1.05s cubic-bezier(.22,1,.36,1)}
     .ltnote.show .ltsheet{opacity:1;transform:none;pointer-events:auto}
     .ltin{border:2px dotted rgba(0,48,73,.4);padding:clamp(16px,4.5vw,32px) clamp(16px,5vw,36px)}
-    .ltin p{margin:0 0 .8em}
-    .ltin .ltsal{font-size:1.3em;margin-bottom:.55em}
-    .ltin .ltcaps,.ltcaps{font-weight:700;color:#b3382a;font-size:.93em;line-height:1.38}
-    .ltin p.ltcaps{margin:.2em 0 .9em;padding-left:.8em;border-left:3px solid rgba(179,56,42,.45)}
-    .ltin .ltend{margin:.3em 0 0;font-size:1.12em}
+    .ltin p{margin:0 0 1em}
+    .ltin p:last-child{margin-bottom:0}
 
     .pumpkin.exit{pointer-events:none}
     .pumpkin.exit .pslide{translate:125vw 0;transition:translate .95s cubic-bezier(.65,0,.35,1)}
@@ -275,12 +272,10 @@
 
     /* ---------- the note (the letter's text) ---------- */
     const NOTE_HTML = `<div class="ltnote" id="ltnote"><div class="ltsheet" tabindex="0" role="document" aria-label="Letter"><div class="ltin">
-      <p class="ltsal">Dear Nati,</p>
-      <p>We have currently reached the one before the last bestie for this year. One more of her and she has officially clocked all pre adult besties. Safe to say she's had quite the battles with her and there's a lot more of her coming your way, but let me let you on in a secret...well not exactly a secret it's more of a fact which is</p>
-      <p class="ltcaps">SHE IS GOING TO CLOCK THIS MONTHS BESTIE AND EVERY MONTHS BESTIE THAT WILL COME HER WAY BECAUSE SHE IS THE STRONGEST, COOLEST, FLAWLESS, MAGNIFICENTESTEST AND MOST INDEPENDESTEST PRINCESS THERE IS.</p>
-      <p>She could be reading this when she is properly dying so stay strong ma'am you got this okay hang in there and get well soon (Biiiiiiiiiiiiiiiiig Hugggggggg) (if I gave this irl she's side eyeing me only) and if you need to complain about bestie, doesn't matter where I am, please I am here to hear you out and complain with you okay.</p>
-      <p><span class="ltcaps">NO MATTER THE TIME OR PLACE</span> (insert the *we will be there no matter what* sticker).</p>
-      <p class="ltend">So stay strong, big smiles, no sads and get well soon &lt;3.</p>
+      <p>Dear Nati,</p>
+      <p>We have currently reached the one before the last bestie for this year. One more of her and she has officially clocked all pre adult besties. Safe to say she's had quite the battles with her and there's a lot more of her coming your way, but let me let you on in a secret...well not exactly a secret it's more of a fact which is SHE IS GOING TO CLOCK THIS MONTHS BESTIE AND EVERY MONTHS BESTIE THAT WILL COME HER WAY BECAUSE SHE IS THE STRONGEST, COOLEST, FLAWLESS, MAGNIFICENTESTEST AND MOST INDEPENDESTEST PRINCESS THERE IS.</p>
+      <p>She could be reading this when she is properly dying so stay strong ma'am you got this okay hang in there and get well soon (Biiiiiiiiiiiiiiiiig Hugggggggg) (if I gave this irl she's side eyeing me only) and if you need to complain about bestie, doesn't matter where I am, please I am here to hear you out and complain with you okay. NO MATTER THE TIME OR PLACE (insert the *we will be there no matter what* sticker).</p>
+      <p>So stay strong, big smiles, no sads and get well soon &lt;3.</p>
     </div></div></div>`;
     let noteEl = null, noted = false;
     function showNote() {                                              // the envelope drops away and fades, the full letter rises into the middle

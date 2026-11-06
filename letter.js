@@ -2,19 +2,28 @@
 /* =====================================================================
    Three questions + envelope + coin
    ---------------------------------------------------------------------
-   - three cards, each needs a correct name; when all three are right the envelope opens by itself
-   - the coin inside rises out of the envelope and can be dragged anywhere on the page
+   - three cards, each needs its own correct answer; when all three are right the envelope opens by itself
+   - the coin inside rises out of the envelope and can be dragged out onto the page
    - nothing is saved: every visit starts fresh (closed envelope, empty cards)
    ===================================================================== */
 
-/* The accepted answer(s). Capitals, spaces, punctuation and accents are ignored, so "  NATI. " also works.
-   Add more spellings / nicknames here, e.g. ['nati', 'natty']. (Anyone who views the page source can read this line.) */
-const ANSWERS = ['nati'];
+/* The accepted answers, one list per question (the keys are the data-q numbers).
+   Before comparing, the typed text is lower-cased and everything except letters/digits is removed
+   (spaces, punctuation, accents), so:
+     Q2: "A hug", "a hug", "AHUG", "Hug", " hug! " are all correct
+     Q3: only "0" is correct
+   (Anyone who views the page source can read these lines.) */
+const ANSWERS = {
+  1: ['nati'],
+  2: ['hug', 'ahug'],
+  3: ['0']
+};
 
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
-const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-const OK = ANSWERS.map(norm);
+const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+const OK = {};
+Object.keys(ANSWERS).forEach(k => { OK[k] = ANSWERS[k].map(norm); });
 
 const toast = t => { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 2400); };
 
@@ -33,9 +42,9 @@ function check(card) {
   const q = card.dataset.q, input = card.querySelector('.ans');
   if (solved.has(q)) return;
   const v = input.value;
-  if (!norm(v)) { toast('Type a name first'); input.focus(); return; }
+  if (!norm(v)) { toast('Type an answer first'); input.focus(); return; }
 
-  if (OK.includes(norm(v))) {
+  if ((OK[q] || []).includes(norm(v))) {
     solved.add(q);
     card.classList.add('done'); input.readOnly = true; input.setAttribute('aria-disabled', 'true');
     dots[solved.size - 1].classList.add('on');
@@ -59,11 +68,10 @@ $('#qlist').addEventListener('keydown', e => {
 $('#qlist').addEventListener('click', e => { const b = e.target.closest('.qbtn'); if (b) check(b.closest('.qc')); });
 
 /* ---------------- the envelope opens ----------------
-   The whole sequence now lives in CSS (see letter.css, "ENVELOPE"):
+   The whole sequence lives in CSS (see letter.css, "ENVELOPE"):
      1. the flap swings up (the layer change happens by itself at the exact moment it is edge-on, so nothing pops)
      2. the coin glides up out of the pocket a moment later
-   JS only switches it on with one class, then waits for the coin's glide to finish before allowing it to be grabbed.
-   The old version used a chain of setTimeouts to swap layers mid-swing, which is what made the opening look jumpy. */
+   JS only switches it on with one class, then waits for the coin's glide to finish before allowing it to be grabbed. */
 function openEnvelope() {
   if (opened) return; opened = true;
 
